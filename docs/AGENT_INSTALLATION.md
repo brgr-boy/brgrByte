@@ -26,7 +26,7 @@ brgrByte wraps these separately licensed tools; it invokes them and collects the
 
    ```sh
    docker compose run --rm --no-deps --entrypoint mtr agent \
-     --json --report -n --report-cycles 1 --max-ttl 2 127.0.0.1
+     --report --json -n --report-cycles 1 --max-ttl 2 127.0.0.1
    ```
 
    A JSON report showing the `127.0.0.1` hop with less than 100% loss verifies that MTR can probe inside this container; it does not verify connectivity to other destinations. Check Docker logs and firewall/host security policies if this command fails.

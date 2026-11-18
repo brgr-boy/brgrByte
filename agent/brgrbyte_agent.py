@@ -48,8 +48,8 @@ def run_mtr(job: dict) -> dict:
         completed = subprocess.run(
             [
                 "mtr",
-                "--json",
                 "--report",
+                "--json",
                 "-n",
                 "--report-cycles",
                 str(cycles),

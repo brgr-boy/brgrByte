@@ -109,7 +109,7 @@ To check MTR's local probe permissions:
 
 ```sh
 docker compose run --rm --no-deps --entrypoint mtr agent \
-  --json --report -n --report-cycles 1 --max-ttl 2 127.0.0.1
+  --report --json -n --report-cycles 1 --max-ttl 2 127.0.0.1
 ```
 
 The JSON should show the `127.0.0.1` hop with less than 100% loss. This verifies a local probe, not connectivity to a remote destination. See [agent installation](AGENT_INSTALLATION.md) for private CA certificates, host permissions, updates, and native Debian installation.

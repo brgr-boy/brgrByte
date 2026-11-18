@@ -16,6 +16,7 @@ def test_mtr_uses_fixed_arguments_and_parses_report():
     with patch.object(agent.subprocess, "run", return_value=process) as run:
         result = agent.run_mtr(job)
     assert result["success"]
+    assert run.call_args.args[0][:4] == ["mtr", "--json", "--report", "-n"]
     assert run.call_args.args[0][-1] == "example.com"
     assert run.call_args.kwargs["timeout"] == 90
     assert "shell" not in run.call_args.kwargs

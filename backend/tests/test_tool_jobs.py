@@ -236,7 +236,7 @@ def test_network_tool_lifecycle_and_validation(client):
     for engine, config in (
         ("nmap", {"ports": [22, 443]}),
         ("ping", {"count": 2}),
-        ("traceroute", {}),
+        ("traceroute", {"max_hops": 12}),
     ):
         base = {"source_agent_id": source_id, "target": "127.0.0.1", **config}
         created = client.post(f"/api/v1/tests/{engine}", headers=user, json=base)
@@ -250,6 +250,8 @@ def test_network_tool_lifecycle_and_validation(client):
         result = client.get("/api/v1/tests", headers=user).json()[0]
         assert result["status"] == "COMPLETED"
         assert result["results"][0]["metrics"]["report"] == report
+        if engine == "traceroute":
+            assert result["configuration"]["max_hops"] == 12
 
     base = {"source_agent_id": source_id, "target": "localhost"}
     for ports in ([], [22, 22], [True], [0], [65536], list(range(1, 102))):
@@ -269,6 +271,15 @@ def test_network_tool_lifecycle_and_validation(client):
         ).status_code
         == 422
     )
+    for max_hops in (0, 31, True):
+        assert (
+            client.post(
+                "/api/v1/tests/traceroute",
+                headers=user,
+                json={**base, "max_hops": max_hops},
+            ).status_code
+            == 422
+        )
     assert client.post("/api/v1/tests/nmap", json=base).status_code == 401
     with SessionLocal.begin() as db:
         db.add(User(username="viewer", role="viewer", password_hash=hash_password("test-password")))

@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const source = await readFile(new URL('../src/burger.ts', import.meta.url), 'utf8');
 const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
-const { combos, eligibleSource, placeOrder, tools } = await import(`data:text/javascript,${encodeURIComponent(js)}`);
+const { combos, eligibleSource, isPlainSeasoning, plainSeasoning, placeOrder, tools } = await import(`data:text/javascript,${encodeURIComponent(js)}`);
 
 test('combos name real tools and require every tool on the source', () => {
   const known = new Set(tools.map((tool) => tool.id));
@@ -39,4 +39,20 @@ test('orders queue one request per tool and retain partial failures', async () =
     queued: ['ping', 'traceroute'],
     failed: [{ engine: 'mtr', error: 'agent offline' }],
   });
+});
+
+test('seasonings are plain at tool defaults and become seasoned when a setting changes', () => {
+  for (const tool of tools) {
+    assert.equal(isPlainSeasoning(tool.id, plainSeasoning), true, `${tool.name} defaults to plain`);
+  }
+  assert.equal(isPlainSeasoning('mtr', { ...plainSeasoning, cycles: 12 }), false);
+  assert.equal(isPlainSeasoning('ping', { ...plainSeasoning, pingCount: 6 }), false);
+  assert.equal(isPlainSeasoning('traceroute', { ...plainSeasoning, maxHops: 12 }), false);
+  assert.equal(isPlainSeasoning('dns', { ...plainSeasoning, dnsType: 'AAAA' }), false);
+  assert.equal(isPlainSeasoning('nmap', { ...plainSeasoning, scanPorts: '443' }), false);
+  assert.equal(isPlainSeasoning('iperf3', { ...plainSeasoning, duration: 30 }), false);
+  assert.equal(isPlainSeasoning('iperf3', { ...plainSeasoning, destinationAgent: 'receiver-id' }), false);
+  assert.equal(isPlainSeasoning('sipp', { ...plainSeasoning, calls: 100 }), false);
+  assert.equal(isPlainSeasoning('sipp', { ...plainSeasoning, rate: 3 }), false);
+  assert.equal(isPlainSeasoning('sipp', { ...plainSeasoning, concurrency: 20 }), false);
 });

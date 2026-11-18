@@ -1,10 +1,10 @@
 # Getting started
 
-This guide uses the launcher to start the control center, a site agent, or both on one workstation, then runs an MTR test. The same agent can run iPerf3, SIPp, Nmap, ping, traceroute, and DNS queries.
+This guide uses the launcher to start the **Order Window** (the dashboard), **Chefs** (site agents), or both on one workstation, then runs an MTR test. A Chef can also run iPerf3, SIPp, Nmap, ping, traceroute, and DNS queries.
 
 ```mermaid
 flowchart LR
-    A["1. Start control center"] --> B["2. Register agent with administrator login"]
+    A["1. Start Order Window"] --> B["2. Register Chef"]
     B --> C["3. Start agent at site"]
     C --> D["4. Run test and view report"]
 ```
@@ -32,7 +32,7 @@ py -3 start.py
 python3 start.py
 ```
 
-Choose **dashboard**, **agent**, or **both**. The first dashboard launch asks you to choose an administrator username and password and generates database and signing secrets in the root `.env`. For **both**, the launcher starts the dashboard, then uses that new administrator account to register an agent and save its unique credential. If the dashboard was already configured, enter its existing administrator username and password when prompted. For **agent**, enter the existing control center's API URL and administrator credentials; the launcher registers an agent for you. The launcher asks for an agent name, offering a unique default.
+Choose **Order Window (dashboard)**, **Chef (site agent)**, or **both**. The first Order Window launch asks you to choose an administrator username and password and generates database and signing secrets in the root `.env`. For **both**, the launcher starts the Order Window, then uses that new administrator account to register a Chef and save its unique credential. If the Order Window was already configured, enter its existing administrator username and password when prompted. For **Chef**, enter the Order Window API URL and administrator credentials; the launcher registers a site agent for you. The launcher asks for a Chef name, offering a unique default.
 
 The combined mode defaults to `http://localhost:8000`; on Windows this requires Docker Desktop host networking to be enabled. Remote agent URLs require trusted HTTPS, and the launcher and agent container must both trust its certificate. No shared default passwords or agent credentials are installed.
 
@@ -40,7 +40,7 @@ Run the same command again to reuse existing configuration, or choose directly w
 
 On Linux, newly generated files are created with owner-only permissions. On Windows, access follows the directory's inherited ACLs: restrict access to the repository and both `.env` files. Docker administrators can also inspect container environment variables. If dashboard browser access is remote, set the API URL and CORS origins as described below before launching.
 
-## Manual control-center configuration
+## Manual Order Window configuration
 
 From the repository root, copy `.env.example` to `.env`:
 
@@ -68,13 +68,13 @@ Open [http://localhost:8080](http://localhost:8080) on the control-center host a
 
 If startup fails, inspect `docker compose logs api` and `docker compose logs db`. The administrator is created only when the configured username does not already exist; changing the bootstrap password does not reset an existing account.
 
-## Create an agent credential manually
+## Register a Chef manually
 
-1. Sign in as an administrator. Optionally add a location on the **Sites** page.
-2. On **Agents**, enter a unique name, optionally select the site, and choose **Create agent**.
+1. Sign in to the Order Window as an administrator. Optionally add a location on the **Sites** page.
+2. On **Chefs**, enter a unique name, optionally select the site, and choose **Add Chef**.
 3. Copy the credential immediately. It is shown only once. Each agent needs its own credential; treat it as a secret.
 
-If a credential is lost or compromised, revoke the agent from the dashboard and create a new agent identity. Revocation cancels associated queued or running jobs but cannot stop a process already running on the host.
+If a credential is lost or compromised, revoke the Chef from the Order Window and register a new identity. Revocation cancels associated queued or running jobs but cannot stop a process already running on the host.
 
 ## Manual agent configuration
 
@@ -103,24 +103,24 @@ docker compose up -d --build
 docker compose logs -f agent
 ```
 
-Refresh **Agents** in the dashboard. The agent should appear online and advertise `mtr`, `iperf3`, `sipp`, `nmap`, `ping`, `traceroute`, and `dns`. The image installs those packages during the build; the site host does not need separate installations. Rebuild and restart an existing agent image to add the new tools.
+Refresh **Chefs** in the Order Window. The site agent should appear online and advertise `mtr`, `iperf3`, `sipp`, `nmap`, `ping`, `traceroute`, and `dns`. The image installs those packages during the build; the site host does not need separate installations. Rebuild and restart an existing agent image to add the new tools.
 
 To check MTR's local probe permissions:
 
 ```sh
 docker compose run --rm --no-deps --entrypoint mtr agent \
-  --json --report --numeric --report-cycles 1 --max-ttl 2 127.0.0.1
+  --json --report -n --report-cycles 1 --max-ttl 2 127.0.0.1
 ```
 
 The JSON should show the `127.0.0.1` hop with less than 100% loss. This verifies a local probe, not connectivity to a remote destination. See [agent installation](AGENT_INSTALLATION.md) for private CA certificates, host permissions, updates, and native Debian installation.
 
 ## Run a test and view its report
 
-1. Open **Build & bite** and choose **Build your burger**. Select **MTR** as a tool patty, and select an online source agent that supports every selected tool.
-2. Enter an authorized destination hostname or IP, adjust MTR's probe-cycle topping, then choose **Run selected tests**.
+1. Open **Build & bite** and choose **Build your burger**. Select **MTR** as a patty and choose an online Chef that supports every selected tool.
+2. Enter an authorized destination hostname or IP. MTR seasoning starts **Plain** at the default 10 probe cycles; open it to customize, then choose **Place order**.
 3. Choose **Take a bite** to view recent test statuses and reports. Refresh the dashboard to update them, and expand **View raw JSON** for the tool output.
 
-Select multiple patties to queue separate tests against the same source and destination, or choose **Path combo** (ping, MTR, traceroute) or **Service combo** (ping, Nmap). Selecting a combo replaces the current tools and resets its settings to defaults; toppings can be adjusted before running tests. The source must support all selected tools. Tests have individual reports and are not an atomic order: if some requests fail, the dashboard lists confirmed and unconfirmed tools. Check recent tests before retrying an unconfirmed request, because a lost response may have queued it. The bite view shows the latest 100 tests across all burgers, not a grouped order. Agents execute jobs one at a time, and queued jobs expire after five minutes, so large or slow orders may time out. iPerf3 and SIPp require suitable endpoints and can generate significant traffic.
+Select multiple patties to queue separate tests against the same Chef and destination, or choose **Path combo** (ping, MTR, traceroute) or **Service combo** (ping, Nmap). Each selected patty has its own seasoning card: **Plain** means the tool's defaults; customize its settings or reset to Plain. Choosing a combo replaces the selected patties and resets seasonings. The Chef must support every selected tool. Tests have individual reports and are not an atomic order: if some requests fail, the Order Window lists confirmed and unconfirmed tools. Check recent tests before retrying an unconfirmed request, because a lost response may have queued it. The bite view shows the latest 100 tests across all burgers, not a grouped order. Chefs execute jobs one at a time, and queued jobs expire after five minutes, so large or slow orders may time out. iPerf3 and SIPp require suitable endpoints and can generate significant traffic.
 
 `COMPLETED` for MTR means a report was collected; inspect the hops and loss rather than assuming the destination is reachable. A queued job can time out if the agent does not claim it, and an executing job can time out if its result is not delivered.
 

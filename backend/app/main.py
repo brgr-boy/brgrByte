@@ -35,7 +35,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="brgrByte Control Center", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="brgrByte Order Window API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.parsed_cors_origins,

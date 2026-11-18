@@ -18,7 +18,7 @@ jobs:
         working-directory: backend
       - run: ruff check app migrations tests ../agent ../start.py
         working-directory: backend
-      - run: pytest -q
+      - run: python -m pytest -q
         working-directory: backend
       - run: python -m alembic upgrade head
         working-directory: backend

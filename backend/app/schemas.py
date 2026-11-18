@@ -112,7 +112,7 @@ class PingCreate(TargetedTestCreate):
 
 
 class TracerouteCreate(TargetedTestCreate):
-    pass
+    max_hops: int = Field(default=30, ge=1, le=30, strict=True)
 
 
 class DnsCreate(TargetedTestCreate):

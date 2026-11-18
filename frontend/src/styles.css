@@ -109,7 +109,20 @@ body{color:var(--text)}
 .site-form .tool-choice{display:flex;gap:8px;align-items:flex-start;border:1px solid #604432;border-radius:8px;padding:9px;background:#211914;margin:0;cursor:pointer}
 .site-form .tool-choice.selected{border-color:#e3a057;background:#493020}
 .site-form .tool-choice input{width:auto;margin:1px 0 0;accent-color:#e9913f}
-.topping{display:grid;gap:7px;background:#211914;border:1px solid #4d3628;border-radius:8px;padding:11px}
+.seasoning-panel{border:1px solid #4d3628;border-radius:8px;background:#211914;overflow:hidden}
+.seasoning-panel>summary{display:flex;align-items:center;gap:12px;padding:11px;cursor:pointer;list-style:none}
+.seasoning-panel>summary::-webkit-details-marker{display:none}
+.seasoning-panel>summary:focus-visible{outline:2px solid #ffca76;outline-offset:-2px}
+.seasoning-title{display:grid;gap:3px;flex:1}
+.seasoning-title strong{font-size:12px;color:#ffcc81}
+.seasoning-title small{font-size:10px;color:#cbb39d}
+.seasoning-badge{border-radius:999px;padding:4px 8px;font-size:9px;font-weight:700}
+.seasoning-badge.plain{background:#28361e;color:#d9edb8}
+.seasoning-badge.custom{background:#493021;color:#ffcb7c}
+.topping{display:grid;gap:7px;padding:0 11px 11px}
+.reset-seasoning{justify-self:start;margin:2px 0 0;border:1px solid #755035;background:#30221b;color:#f8e4ca;border-radius:6px;padding:7px 9px;font-size:10px}
+.site-form .reset-seasoning{margin-top:2px}
+.reset-seasoning:hover{border-color:#e4a253}
 .topping h3{margin:0;font-size:12px;color:#ffcc81}.topping p,.order-help{font-size:10px;line-height:1.5;color:#cbb39d;margin:0}
 .order-notice{margin:0;padding:10px;border:1px solid #648643;background:#28361e;border-radius:7px;color:#d9edb8;font-size:11px;line-height:1.5}
 .order-button{width:100%}

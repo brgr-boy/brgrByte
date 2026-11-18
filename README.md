@@ -2,7 +2,7 @@
 
 **Run network tests from multiple sites. Collect results in one dashboard.**
 
-brgrByte is a self-hosted dashboard and API that coordinates site agents. Agents run established network tools and send their reports back to the dashboard.
+brgrByte is a self-hosted network testing platform. The **Order Window** is its dashboard; **Chefs** are the site agents that run established network tools and report results back. As the customer, choose your test patties, season them, and place the order.
 
 > **Project status:** Live container execution and Raspberry Pi/ARM64 deployments have not been validated. Test in a lab before production use. See the [roadmap](docs/ROADMAP.md).
 
@@ -18,13 +18,13 @@ brgrByte is a self-hosted dashboard and API that coordinates site agents. Agents
 | **iPerf3** | TCP throughput to an existing or temporary receiver. Managed tests save both reports. |
 | **SIPp** | Bounded SIP call-load tests over UDP; signaling only, no RTP media measurements. |
 
-brgrByte also includes agent and site inventory, role-based access, credential provisioning and revocation, and saved test sessions. A report does not prove that a destination is reachable: firewalls and rate limits can affect results. Only test systems you are authorized to probe.
+brgrByte also includes Chef and site inventory, role-based access, credential provisioning and revocation, and saved test sessions. A report does not prove that a destination is reachable: firewalls and rate limits can affect results. Only test systems you are authorized to probe.
 
 ## How it works
 
-![Dashboard coordinating site agents and network tests](docs/images/networkpath-architecture.svg)
+![The Order Window dashboard coordinating Chef site agents and network tests](docs/images/networkpath-architecture.svg)
 
-The dashboard coordinates tests and stores reports. Agents send test traffic directly to destinations; they can run in the provided Linux container or as a native Debian service.
+The Order Window coordinates tests and stores reports. Chefs send test traffic directly to destinations; they can run in the provided Linux container or as a native Debian service.
 
 ## Get started
 
@@ -40,7 +40,7 @@ py -3 start.py
 python3 start.py
 ```
 
-Choose **dashboard**, **agent**, or **both** when prompted. You can also pass `--mode dashboard`, `--mode agent`, or `--mode both`. First-time setup asks you to create an administrator account. The launcher can use it to register an agent with a unique credential and does not overwrite existing configuration.
+Choose **Order Window (dashboard)**, **Chef (site agent)**, or **both** when prompted. The command-line options remain `--mode dashboard`, `--mode agent`, and `--mode both`. First-time setup asks you to create an administrator account. The launcher can use it to register a Chef with a unique credential and does not overwrite existing configuration.
 
 Windows agents run in Docker Desktop's Linux environment, not on the Windows network stack. Host networking must be enabled, and raw ICMP may be unavailable. Remote agents need a trusted HTTPS API endpoint.
 
@@ -48,7 +48,7 @@ For setup instructions and limitations, see the **[getting started guide](docs/G
 
 ## Run tests
 
-In **Build & bite**, choose tools (patties), configure them (toppings), and run the tests. Each tool is a separate test from one source agent to one destination. **Take a bite** opens statuses and reports. The Path and Service combos are presets; choosing one replaces your current tools and settings.
+In **Build & bite**, you are the customer: choose tools as patties, adjust each patty's **seasoning**, and place your order. Each seasoning card starts **Plain**, meaning the tool's default settings; change a setting to customize it, or reset it to Plain. Each patty is queued as a separate test from one Chef to the destination. **Take a bite** opens statuses and reports. The Path and Service combos are presets.
 
 ## Documentation
 

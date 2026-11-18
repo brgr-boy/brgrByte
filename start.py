@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start the brgrByte dashboard, site agent, or both."""
+"""Start the Order Window dashboard, a Chef site agent, or both."""
 
 import argparse
 import getpass
@@ -67,7 +67,10 @@ def setup_dashboard():
     if path.exists():
         print(f"Using existing {path}; it will not be overwritten.")
         return None
-    print("Creating dashboard configuration. The password is not displayed while typing.")
+    print(
+        "Creating the Order Window dashboard configuration. "
+        "The password is not displayed while typing."
+    )
     username = prompt("Administrator username", "admin")
     if not re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", username):
         raise ValueError(
@@ -158,15 +161,15 @@ def setup_agent(combined, dashboard_credentials=None):
         print(f"Using existing {path}; it will not be overwritten.")
         return
     default = "http://localhost:8000" if combined else None
-    url = validate_api_url(prompt("Control-center API URL", default))
+    url = validate_api_url(prompt("Order Window API URL", default))
     if dashboard_credentials is not None and url == "http://localhost:8000":
         username, password = dashboard_credentials
         print("Using the administrator account created during this setup.")
     else:
-        username = prompt("Dashboard administrator username", "admin")
+        username = prompt("Order Window administrator username", "admin")
         password = getpass.getpass("Dashboard administrator password (input hidden): ")
     default_name = f"{socket.gethostname()[:75]}-{secrets.token_hex(3)}"
-    name = prompt("Agent name", default_name).strip()
+    name = prompt("Chef name", default_name).strip()
     if not name or len(name) > 120:
         raise ValueError("Agent name must be between 1 and 120 characters.")
 
@@ -217,7 +220,7 @@ def verify_agent(since, timeout=45):
             (i for i, line in enumerate(lines) if re.search(r"\bERROR\b", line)), default=-1
         )
         if last_success > last_error:
-            print("Agent connected to the control center. Refresh the Agents page.")
+            print("Chef connected to the Order Window. Refresh the Chefs page.")
             return
         time.sleep(3)
     raise RuntimeError(
@@ -232,7 +235,7 @@ def main():
     args = parser.parse_args()
     mode = args.mode
     if mode is None:
-        print("Choose a mode: 1) dashboard  2) agent  3) both")
+        print("Choose a mode: 1) Order Window (dashboard)  2) Chef (site agent)  3) both")
         mode = {"1": "dashboard", "2": "agent", "3": "both"}.get(prompt("Selection"))
         if mode is None:
             raise ValueError("Select 1, 2, or 3.")
@@ -250,7 +253,7 @@ def main():
     if mode in ("dashboard", "both"):
         dashboard_credentials = setup_dashboard()
         compose(ROOT, "up", "-d", "--build", "--wait", "--wait-timeout", "240")
-        print("Dashboard is running at http://localhost:8080")
+        print("Order Window is running at http://localhost:8080")
     if mode in ("agent", "both"):
         setup_agent(mode == "both", dashboard_credentials)
         compose(AGENT, "up", "-d", "--build", "--wait", "--wait-timeout", "240")

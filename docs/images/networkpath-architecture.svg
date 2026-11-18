@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 600" role="img" aria-labelledby="title description">
-  <title id="title">brgrByte architecture</title>
-  <desc id="description">A centralized dashboard on the left coordinates two agents in the center. The agents exchange test traffic in both directions and each can send test traffic to external endpoints on the right.</desc>
+  <title id="title">brgrByte architecture: Order Window and Chefs</title>
+  <desc id="description">The Order Window dashboard on the left coordinates Chef site agents in the center. The agents exchange test traffic in both directions and each can send test traffic to external endpoints on the right.</desc>
   <defs>
     <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="strokeWidth">
       <path d="M1 1 L9 5 L1 9 Z" fill="#4a8fe7"/>
@@ -18,7 +18,7 @@
 
   <path d="M545 198 L545 402" fill="none" stroke="#4a8fe7" stroke-width="3" marker-start="url(#arrow-blue)" marker-end="url(#arrow-blue)"/>
   <rect x="559" y="277" width="160" height="46" rx="8" fill="#101925"/>
-  <text x="568" y="296" fill="#a9cdf8" font-family="Arial, sans-serif" font-size="15">Direct agent-to-agent</text>
+  <text x="568" y="296" fill="#a9cdf8" font-family="Arial, sans-serif" font-size="13">Chef-to-Chef</text>
   <text x="568" y="315" fill="#a9cdf8" font-family="Arial, sans-serif" font-size="15">test traffic</text>
 
   <path d="M660 150 L820 255" fill="none" stroke="#4a8fe7" stroke-width="3" marker-end="url(#arrow-blue)"/>
@@ -27,18 +27,18 @@
   <text x="710" y="438" fill="#a9cdf8" font-family="Arial, sans-serif" font-size="15">Test traffic</text>
 
   <rect x="30" y="225" width="270" height="150" rx="15" fill="#1d2b3c" stroke="#7292b8" stroke-width="2"/>
-  <text x="165" y="267" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="22" font-weight="bold">Central dashboard</text>
-  <text x="165" y="297" text-anchor="middle" fill="#c6d3e2" font-family="Arial, sans-serif" font-size="16">Control center and API</text>
+  <text x="165" y="267" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="22" font-weight="bold">Order Window</text>
+  <text x="165" y="297" text-anchor="middle" fill="#c6d3e2" font-family="Arial, sans-serif" font-size="16">Control dashboard and API</text>
   <text x="165" y="323" text-anchor="middle" fill="#c6d3e2" font-family="Arial, sans-serif" font-size="16">Inventory and saved reports</text>
   <text x="165" y="348" text-anchor="middle" fill="#9aacc2" font-family="Arial, sans-serif" font-size="14">PostgreSQL</text>
 
   <rect x="430" y="70" width="230" height="125" rx="15" fill="#1d2b3c" stroke="#7292b8" stroke-width="2"/>
-  <text x="545" y="113" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="23" font-weight="bold">Agent 1</text>
+  <text x="545" y="113" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="23" font-weight="bold">Chef 1</text>
   <text x="545" y="144" text-anchor="middle" fill="#c6d3e2" font-family="Arial, sans-serif" font-size="16">Site A</text>
   <text x="545" y="170" text-anchor="middle" fill="#9aacc2" font-family="Arial, sans-serif" font-size="15">MTR · iPerf3 · SIPp</text>
 
   <rect x="430" y="405" width="230" height="125" rx="15" fill="#1d2b3c" stroke="#7292b8" stroke-width="2"/>
-  <text x="545" y="448" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="23" font-weight="bold">Agent 2</text>
+  <text x="545" y="448" text-anchor="middle" fill="#f2f7ff" font-family="Arial, sans-serif" font-size="23" font-weight="bold">Chef 2</text>
   <text x="545" y="479" text-anchor="middle" fill="#c6d3e2" font-family="Arial, sans-serif" font-size="16">Site B</text>
   <text x="545" y="505" text-anchor="middle" fill="#9aacc2" font-family="Arial, sans-serif" font-size="15">MTR · iPerf3 · SIPp</text>
 

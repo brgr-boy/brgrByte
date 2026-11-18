@@ -63,8 +63,8 @@ export const createNmap = (token: string, source_agent_id: string, target: strin
 export const createPing = (token: string, source_agent_id: string, target: string, count: number) =>
   request<TestSession>('/api/v1/tests/ping', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target, count }) });
 
-export const createTraceroute = (token: string, source_agent_id: string, target: string) =>
-  request<TestSession>('/api/v1/tests/traceroute', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target }) });
+export const createTraceroute = (token: string, source_agent_id: string, target: string, max_hops: number) =>
+  request<TestSession>('/api/v1/tests/traceroute', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target, max_hops }) });
 
 export const createDns = (token: string, source_agent_id: string, target: string, server: string, record_type: string) =>
   request<TestSession>('/api/v1/tests/dns', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target, server, record_type }) });

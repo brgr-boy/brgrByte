@@ -207,8 +207,9 @@ def test_ping_and_traceroute_results_and_failures():
             "report": {"output": "output"},
         }
         assert "-6" in run.call_args.args[0]
-        assert agent.run_traceroute({"target": "example.com"})["success"]
+        assert agent.run_traceroute({"target": "example.com", "max_hops": 12})["success"]
         assert run.call_args.args[0][:3] == ["traceroute", "-n", "-q"]
+        assert run.call_args.args[0][7] == "12"
     with patch.object(
         agent.subprocess,
         "run",
@@ -218,6 +219,9 @@ def test_ping_and_traceroute_results_and_failures():
         assert not result["success"] and result["report"]["output"] == "100% packet loss"
     assert not agent.run_ping({"target": "-bad", "count": 4})["success"]
     assert not agent.run_ping({"target": "localhost", "count": 11})["success"]
-    assert not agent.run_traceroute({"target": "192.0.2.0/24"})["success"]
+    assert not agent.run_traceroute({"target": "192.0.2.0/24", "max_hops": 30})["success"]
+    for max_hops in (0, 31, True):
+        assert not agent.run_traceroute({"target": "localhost", "max_hops": max_hops})["success"]
     with patch.object(agent.subprocess, "run", side_effect=OSError("missing executable")):
-        assert "missing executable" in agent.run_traceroute({"target": "localhost"})["error"]
+        result = agent.run_traceroute({"target": "localhost", "max_hops": 30})
+        assert "missing executable" in result["error"]

@@ -50,7 +50,7 @@ def run_mtr(job: dict) -> dict:
                 "mtr",
                 "--json",
                 "--report",
-                "--numeric",
+                "-n",
                 "--report-cycles",
                 str(cycles),
                 "--max-ttl",
@@ -188,11 +188,26 @@ def run_ping(job: dict) -> dict:
 
 
 def run_traceroute(job: dict) -> dict:
-    target = job.get("target")
-    if not isinstance(target, str) or not valid_target(target):
+    target, max_hops = job.get("target"), job.get("max_hops", 30)
+    if (
+        not isinstance(target, str)
+        or not valid_target(target)
+        or not valid_integer(max_hops, 1, 30)
+    ):
         return {"success": False, "error": "Invalid traceroute job"}
     return run_text_probe(
-        ["traceroute", "-n", "-q", "1", "-w", "2", "-m", "30", *ipv6_option(target), target],
+        [
+            "traceroute",
+            "-n",
+            "-q",
+            "1",
+            "-w",
+            "2",
+            "-m",
+            str(max_hops),
+            *ipv6_option(target),
+            target,
+        ],
         "Traceroute",
     )
 

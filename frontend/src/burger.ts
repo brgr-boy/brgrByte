@@ -1,5 +1,64 @@
 export type Engine = 'mtr' | 'iperf3' | 'sipp' | 'nmap' | 'ping' | 'traceroute' | 'dns';
 
+export type Seasoning = {
+  cycles: number;
+  pingCount: number;
+  scanPorts: string;
+  dnsServer: string;
+  dnsType: string;
+  destinationAgent: string;
+  iperfPort: number;
+  duration: number;
+  sipPort: number;
+  service: string;
+  calls: number;
+  rate: number;
+  concurrency: number;
+  maxHops: number;
+};
+
+export const plainSeasoning: Seasoning = {
+  cycles: 10,
+  pingCount: 4,
+  scanPorts: '22,80,443',
+  dnsServer: '8.8.8.8',
+  dnsType: 'A',
+  destinationAgent: '',
+  iperfPort: 5201,
+  duration: 10,
+  sipPort: 5060,
+  service: 'service',
+  calls: 10,
+  rate: 1,
+  concurrency: 10,
+  maxHops: 30,
+};
+
+export function isPlainSeasoning(engine: Engine, seasoning: Seasoning): boolean {
+  switch (engine) {
+    case 'mtr':
+      return seasoning.cycles === plainSeasoning.cycles;
+    case 'ping':
+      return seasoning.pingCount === plainSeasoning.pingCount;
+    case 'traceroute':
+      return seasoning.maxHops === plainSeasoning.maxHops;
+    case 'dns':
+      return seasoning.dnsServer === plainSeasoning.dnsServer && seasoning.dnsType === plainSeasoning.dnsType;
+    case 'nmap':
+      return seasoning.scanPorts === plainSeasoning.scanPorts;
+    case 'iperf3':
+      return seasoning.destinationAgent === plainSeasoning.destinationAgent
+        && seasoning.iperfPort === plainSeasoning.iperfPort
+        && seasoning.duration === plainSeasoning.duration;
+    case 'sipp':
+      return seasoning.sipPort === plainSeasoning.sipPort
+        && seasoning.service === plainSeasoning.service
+        && seasoning.calls === plainSeasoning.calls
+        && seasoning.rate === plainSeasoning.rate
+        && seasoning.concurrency === plainSeasoning.concurrency;
+  }
+}
+
 export const tools: { id: Engine; name: string; description: string }[] = [
   { id: 'mtr', name: 'MTR', description: 'Path, latency and loss' },
   { id: 'ping', name: 'Ping', description: 'ICMP reachability' },
@@ -14,7 +73,7 @@ export type Combo = {
   name: string;
   description: string;
   engines: Engine[];
-  settings: { cycles?: number; pingCount?: number; scanPorts?: string };
+  settings: Partial<Seasoning>;
 };
 
 export const combos: Combo[] = [

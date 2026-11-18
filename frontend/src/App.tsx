@@ -216,7 +216,7 @@ function App() {
           <div className="brand-mark"><Sandwich size={23} /></div>
           <p className="eyebrow">NETWORK OPERATIONS</p>
           <h1>Welcome back</h1>
-          <p className="muted">Sign in to your BrgrByte control center.</p>
+          <p className="muted">Sign in to your brgrByte control center.</p>
           <form onSubmit={handleLogin} className="login-form">
             <label htmlFor="username">Username</label>
             <input id="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
@@ -267,11 +267,11 @@ function App() {
 
       <main className="main-content">
         <header className="topbar">
-          <div className="breadcrumbs"><span>BrgrByte</span><ChevronRight size={14} /><strong>{pageTitle}</strong></div>
+          <div className="breadcrumbs"><span>brgrByte</span><ChevronRight size={14} /><strong>{pageTitle}</strong></div>
           <div className="topbar-actions"><span className="system-status"><i /> Control plane operational</span><button className="icon-button" aria-label="Refresh data" onClick={() => void refresh(token)} disabled={loading}><Activity size={17} /></button></div>
         </header>
         <div className="page-content">
-          <p className="tool-attribution">BrgrByte wraps independent network tools and uses the <a href="https://nmap.org/" target="_blank" rel="noopener noreferrer">Nmap Security Scanner</a> for TCP scans.</p>
+          <p className="tool-attribution">brgrByte wraps independent network tools and uses the <a href="https://nmap.org/" target="_blank" rel="noopener noreferrer">Nmap Security Scanner</a> for TCP scans.</p>
           <div className="page-heading">
             <div><p className="eyebrow">NETWORK OPERATIONS</p><h1>{pageTitle}</h1><p className="muted">{page === 'overview' ? 'A live view of your distributed testing infrastructure.' : page === 'sites' ? 'Manage locations across your network.' : page === 'agents' ? 'Monitor connected testing agents and their health.' : 'Build your burger with tests, then take a bite of the results.'}</p></div>
             {page === 'sites' && <button className="primary-button" onClick={() => document.getElementById('site-name')?.focus()}><Plus size={16} /> Add site</button>}

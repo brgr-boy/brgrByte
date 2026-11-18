@@ -1,6 +1,6 @@
 # Third-party notices
 
-BrgrByte invokes separately developed tools; their licenses remain applicable.
+brgrByte invokes separately developed tools; their licenses remain applicable.
 The repository does not vendor the Nmap binary or source. The agent Dockerfile
 installs Nmap from Debian at image build time.
 

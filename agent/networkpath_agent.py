@@ -1,4 +1,4 @@
-"""BrgrByte site agent. Configuration is supplied through environment variables."""
+"""brgrByte site agent. Configuration is supplied through environment variables."""
 
 import csv
 import ipaddress

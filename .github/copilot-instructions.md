@@ -1,8 +1,8 @@
-# BrgrByte project context
+# brgrByte project context
 
-BrgrByte is a self-hosted, open-source network testing and reporting platform. A central dashboard coordinates distributed site agents that run open-source tools directly against authorized endpoints. One workstation may run both the dashboard and an agent; deployment should remain approachable on Windows and Linux.
+brgrByte is a self-hosted, open-source network testing and reporting platform. A central dashboard coordinates distributed site agents that run open-source tools directly against authorized endpoints. One workstation may run both the dashboard and an agent; deployment should remain approachable on Windows and Linux.
 
-BrgrByte's own code is GPL-2.0-only; it wraps independently licensed tools rather than replacing them. Nmap's additional terms and image redistribution are not yet cleared; do not imply that plain GPLv2 resolves them. See the README's license section.
+brgrByte's own code is GPL-2.0-only; it wraps independently licensed tools rather than replacing them. Nmap's additional terms and image redistribution are not yet cleared; do not imply that plain GPLv2 resolves them. See the README's license section.
 
 ## Product and UX
 

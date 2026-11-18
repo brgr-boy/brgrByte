@@ -71,7 +71,7 @@ h1,h2,p{margin-top:0}.page-heading h1,.login-card h1{font-family:'Space Grotesk'
 @media(max-width:760px){.sidebar{width:61px;padding:18px 8px}.sidebar-brand{padding:0 7px 25px}.sidebar-brand>span,.version-pill,.workspace-label,.workspace-switch,.nav-section,.nav-item:not(.active),.nav-item.active{font-size:0}.nav-item{justify-content:center;padding:11px 0}.nav-item svg{flex-shrink:0}.nav-count,.help-card,.user-copy,.user-profile>svg{display:none}.nav-item.active{font-size:0}.user-profile{justify-content:center}.main-content{margin-left:61px}.sidebar-brand{font-size:0}.sidebar-brand .brand-mark{width:34px;height:34px}.topbar{height:55px;padding:0 14px}.topbar-actions{gap:9px}.system-status{font-size:0}.system-status i{width:8px;height:8px}.page-content{padding:25px 14px}.page-heading{align-items:flex-start;gap:10px}.page-heading h1{font-size:23px}.page-heading>.primary-button{padding:8px;font-size:10px}.content-grid{grid-template-columns:1fr}.stat-grid{gap:9px}.stat-card{padding:13px;min-height:120px}.stat-value{font-size:25px}.health-content{gap:9px}.donut-wrap{width:135px;height:135px}.health-legend{min-width:100px}.panel-heading{padding:14px}.table-scroll{margin:0}.breadcrumbs{font-size:10px}.login-card{padding:24px}}
 @media(max-width:420px){.stat-grid{grid-template-columns:1fr 1fr}.stat-label{font-size:10px}.health-content{flex-direction:column;padding:12px}.health-legend{width:100%;grid-template-columns:1fr 1fr}.health-summary{grid-column:span 2}}
 
-/* BrgrByte burger builder */
+/* brgrByte burger builder */
 :root{--bg:#18120f;--panel:#241b17;--panel-raised:#30221b;--line:#4b3529;--muted:#c0aa98;--text:#fff1df;--blue:#f5ae56}
 body{color:var(--text)}
 .sidebar{background:#1b1411;border-color:#493426}

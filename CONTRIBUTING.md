@@ -1,7 +1,7 @@
-# Contributing to BrgrByte
+# Contributing to brgrByte
 
-Thank you for helping improve BrgrByte. Code, documentation, bug reports, and
-testing feedback are welcome. If you want to use BrgrByte rather than change
+Thank you for helping improve brgrByte. Code, documentation, bug reports, and
+testing feedback are welcome. If you want to use brgrByte rather than change
 it, start with the [getting started guide](docs/GETTING_STARTED.md).
 
 ## Proposing a change
@@ -97,8 +97,8 @@ VITE_API_BASE_URL=http://localhost:8000 npm run dev
 ## Network tools and licensing
 
 Only test systems you are authorized to probe or load. Preserve bounded inputs,
-agent permissions, and clear reporting when changing test tools. BrgrByte wraps
+agent permissions, and clear reporting when changing test tools. brgrByte wraps
 independently licensed tools; review the [license and third-party notices](README.md#license-and-third-party-tools)
 before changing dependencies or distributing an image. In particular, Nmap
-redistribution clearance remains open. BrgrByte's own code is licensed under
+redistribution clearance remains open. brgrByte's own code is licensed under
 [GPL-2.0-only](LICENSE).

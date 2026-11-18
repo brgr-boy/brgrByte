@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start the BrgrByte dashboard, site agent, or both."""
+"""Start the brgrByte dashboard, site agent, or both."""
 
 import argparse
 import getpass

@@ -1,5 +1,5 @@
 [Unit]
-Description=BrgrByte test agent
+Description=brgrByte test agent
 After=network-online.target
 Wants=network-online.target
 

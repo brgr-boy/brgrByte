@@ -1,4 +1,4 @@
-name: BrgrByte CI
+name: brgrByte CI
 
 on:
   push:

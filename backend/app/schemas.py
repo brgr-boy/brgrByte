@@ -1,7 +1,7 @@
 import ipaddress
 import re
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -113,6 +113,33 @@ class PingCreate(TargetedTestCreate):
 
 class TracerouteCreate(TargetedTestCreate):
     pass
+
+
+class DnsCreate(TargetedTestCreate):
+    server: str = Field(default="8.8.8.8", min_length=1, max_length=45)
+    record_type: Literal["A", "AAAA", "CNAME", "MX", "NS", "SOA", "TXT"] = "A"
+
+    @field_validator("target")
+    @classmethod
+    def valid_target(cls, value: str) -> str:
+        if not re.fullmatch(
+            r"(?=.{1,253}\Z)(?:[A-Za-z0-9_](?:[A-Za-z0-9_-]{0,61}[A-Za-z0-9_])?\.)*"
+            r"[A-Za-z0-9_](?:[A-Za-z0-9_-]{0,61}[A-Za-z0-9_])?\.?",
+            value,
+        ):
+            raise ValueError("DNS target must be a DNS name")
+        return value
+
+    @field_validator("server")
+    @classmethod
+    def valid_server(cls, value: str) -> str:
+        try:
+            address = ipaddress.ip_address(value)
+            if getattr(address, "scope_id", None):
+                raise ValueError("Scoped IPv6 addresses are not supported")
+            return str(address)
+        except ValueError as exc:
+            raise ValueError("DNS server must be an IPv4 or IPv6 address") from exc
 
 
 class NmapCreate(TargetedTestCreate):

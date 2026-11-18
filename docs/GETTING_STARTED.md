@@ -1,6 +1,6 @@
 # Getting started
 
-This guide uses the launcher to start the control center, a site agent, or both on one workstation, then runs an MTR test. The same agent can run iPerf3, SIPp, Nmap, ping, and traceroute.
+This guide uses the launcher to start the control center, a site agent, or both on one workstation, then runs an MTR test. The same agent can run iPerf3, SIPp, Nmap, ping, traceroute, and DNS queries.
 
 ```mermaid
 flowchart LR
@@ -103,7 +103,7 @@ docker compose up -d --build
 docker compose logs -f agent
 ```
 
-Refresh **Agents** in the dashboard. The agent should appear online and advertise `mtr`, `iperf3`, `sipp`, `nmap`, `ping`, and `traceroute`. The image installs those packages during the build; the site host does not need separate installations. Rebuild and restart an existing agent image to add the new tools.
+Refresh **Agents** in the dashboard. The agent should appear online and advertise `mtr`, `iperf3`, `sipp`, `nmap`, `ping`, `traceroute`, and `dns`. The image installs those packages during the build; the site host does not need separate installations. Rebuild and restart an existing agent image to add the new tools.
 
 To check MTR's local probe permissions:
 
@@ -131,6 +131,7 @@ To try the other tools:
 - **Nmap TCP ports:** Enter one authorized hostname or IP and 1–100 distinct, comma-separated TCP port numbers. This uses TCP connect scanning without service-version detection; displayed service names are guesses based on port numbers.
 - **Ping:** Select a destination and 1–10 ICMP probes. No replies is reported as a failed test, with available output retained.
 - **Traceroute UDP:** Trace a single host with up to 30 hops. A collected report does not mean the destination was reached; examine the output for missing replies.
+- **DNS:** Select the DNS patty, enter the DNS name in the shared destination field, and choose a DNS server IP and record type. The default server is `8.8.8.8` and the default type is `A`. The server is used only for the DNS test; other selected tools use the agent's system resolver. A successful `NOERROR` response can contain no answers, or contain CNAMEs without the requested record, so inspect the returned output.
 
 See [network requirements](NETWORK_REQUIREMENTS.md) and [agent installation](AGENT_INSTALLATION.md) for firewall rules and tool-specific limitations.
 

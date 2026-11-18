@@ -197,6 +197,63 @@ def run_traceroute(job: dict) -> dict:
     )
 
 
+def run_dns(job: dict) -> dict:
+    target, server, record_type = (job.get(key) for key in ("target", "server", "record_type"))
+    if (
+        not isinstance(target, str)
+        or not re.fullmatch(
+            r"(?=.{1,253}\Z)(?:[A-Za-z0-9_](?:[A-Za-z0-9_-]{0,61}[A-Za-z0-9_])?\.)*"
+            r"[A-Za-z0-9_](?:[A-Za-z0-9_-]{0,61}[A-Za-z0-9_])?\.?",
+            target,
+        )
+        or not isinstance(server, str)
+    ):
+        return {"success": False, "error": "Invalid DNS job"}
+    try:
+        address = ipaddress.ip_address(server)
+        if getattr(address, "scope_id", None):
+            raise ValueError("Scoped IPv6 addresses are not supported")
+    except ValueError:
+        return {"success": False, "error": "Invalid DNS server address"}
+    if record_type not in ("A", "AAAA", "CNAME", "MX", "NS", "SOA", "TXT"):
+        return {"success": False, "error": "Invalid DNS record type"}
+    try:
+        completed = subprocess.run(
+            [
+                "dig", "-r", f"@{address}", "-q", target, "-t", record_type,
+                "+time=3", "+tries=1", "+noall", "+comments", "+answer", "+stats",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"success": False, "error": f"DNS query failed: {exc}"[:1000]}
+    report = {"server": str(address), "record_type": record_type, "output": completed.stdout}
+    if completed.returncode != 0:
+        return {
+            "success": False,
+            "error": (
+                completed.stderr.strip() or f"DNS query exited {completed.returncode}"
+            )[:1000],
+            "report": report,
+        }
+    match = re.search(r"^;; ->>HEADER<<- .* status: ([A-Z0-9]+),", completed.stdout, re.MULTILINE)
+    if not match:
+        return {"success": False, "error": "DNS response missing status", "report": report}
+    report["status"] = match.group(1)
+    if report["status"] != "NOERROR":
+        return {"success": False, "error": f"DNS response: {report['status']}", "report": report}
+    answer_count = re.search(
+        r"^;; flags:.*;\s*QUERY: \d+, ANSWER: (\d+),", completed.stdout, re.MULTILINE
+    )
+    if not answer_count:
+        return {"success": False, "error": "DNS response missing answer count", "report": report}
+    report["answer_count"] = int(answer_count.group(1))
+    return {"success": True, "report": report}
+
+
 def run_text_probe(args: list[str], name: str) -> dict:
     try:
         completed = subprocess.run(args, capture_output=True, text=True, timeout=90, check=False)
@@ -450,6 +507,7 @@ def main() -> None:
                             ("nmap", "nmap"),
                             ("ping", "ping"),
                             ("traceroute", "traceroute"),
+                            ("dns", "dig"),
                         )
                         if shutil.which(executable) is not None
                     ],
@@ -475,6 +533,8 @@ def main() -> None:
                     result = run_ping(job)
                 elif job["engine"] == "traceroute":
                     result = run_traceroute(job)
+                elif job["engine"] == "dns":
+                    result = run_dns(job)
                 else:
                     result = {"success": False, "error": "Unsupported engine"}
                 pending = (job["id"], result)

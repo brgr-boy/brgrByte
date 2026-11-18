@@ -7,6 +7,78 @@ from unittest.mock import MagicMock, patch
 from test_agent_mtr import agent
 
 
+def test_dns_query_reports_response_status_and_output():
+    job = {"target": "example.com", "server": "8.8.8.8", "record_type": "A"}
+    answer = (
+        ";; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 123\n"
+        ";; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1\n"
+        ";; ANSWER SECTION:\nexample.com. 300 IN A 192.0.2.1\n"
+    )
+    with patch.object(
+        agent.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, answer, "")
+    ) as run:
+        result = agent.run_dns(job)
+        assert result["success"]
+        assert result["report"]["status"] == "NOERROR"
+        assert result["report"]["answer_count"] == 1
+        assert "192.0.2.1" in result["report"]["output"]
+        assert run.call_args.args[0] == [
+            "dig", "-r", "@8.8.8.8", "-q", "example.com", "-t", "A",
+            "+time=3", "+tries=1", "+noall", "+comments", "+answer", "+stats",
+        ]
+        assert run.call_args.kwargs["timeout"] == 15
+    with patch.object(
+        agent.subprocess,
+        "run",
+        return_value=subprocess.CompletedProcess([], 0, answer.replace("NOERROR", "NXDOMAIN"), ""),
+    ):
+        result = agent.run_dns(job)
+        assert not result["success"] and result["report"]["status"] == "NXDOMAIN"
+    with patch.object(
+        agent.subprocess,
+        "run",
+        return_value=subprocess.CompletedProcess([], 0, answer.replace("NOERROR", "SERVFAIL"), ""),
+    ):
+        assert not agent.run_dns(job)["success"]
+    with patch.object(
+        agent.subprocess,
+        "run",
+        return_value=subprocess.CompletedProcess(
+            [], 0, answer.replace("ANSWER: 1", "ANSWER: 0").split(";; ANSWER SECTION:")[0], ""
+        ),
+    ):
+        result = agent.run_dns({**job, "target": "_dmarc.example.com", "record_type": "TXT"})
+        assert result["success"] and result["report"]["answer_count"] == 0
+    with patch.object(
+        agent.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, "bad output", "")
+    ):
+        assert not agent.run_dns(job)["success"]
+    with patch.object(
+        agent.subprocess,
+        "run",
+        return_value=subprocess.CompletedProcess([], 0, answer.split(";; flags:")[0], ""),
+    ):
+        assert agent.run_dns(job)["error"] == "DNS response missing answer count"
+    with patch.object(
+        agent.subprocess, "run", return_value=subprocess.CompletedProcess([], 9, "no servers", "")
+    ):
+        result = agent.run_dns(job)
+        assert not result["success"] and result["report"]["output"] == "no servers"
+    with patch.object(agent.subprocess, "run", side_effect=subprocess.TimeoutExpired("dig", 15)):
+        assert not agent.run_dns(job)["success"]
+    with patch.object(agent.subprocess, "run", side_effect=OSError("dig missing")):
+        assert "dig missing" in agent.run_dns(job)["error"]
+    for bad in (
+        {**job, "server": "example.com"},
+        {**job, "server": "fe80::1%eth0"},
+        {**job, "target": "-bad"},
+        {**job, "target": "::1"},
+        {**job, "target": "example.com;id"},
+        {**job, "record_type": "ANY"},
+    ):
+        assert not agent.run_dns(bad)["success"]
+
+
 def test_iperf_success_and_errors():
     job = {"target": "example.com", "port": 5201, "duration": 3}
     report = {"end": {"sum_received": {"bits_per_second": 42}}}

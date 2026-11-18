@@ -18,7 +18,7 @@ import {
   ShieldCheck,
   Wifi,
 } from 'lucide-react';
-import { createAgent, createIperf, createMtr, createNmap, createPing, createSipp, createSite, createTraceroute, getAgents, getOverview, getSites, getTests, login, revokeAgent } from './api';
+import { createAgent, createDns, createIperf, createMtr, createNmap, createPing, createSipp, createSite, createTraceroute, getAgents, getOverview, getSites, getTests, login, revokeAgent } from './api';
 import { combos, eligibleSource, placeOrder, tools, type Combo, type Engine } from './burger';
 import type { Agent, Overview, Site, TestSession } from './types';
 
@@ -51,6 +51,8 @@ function App() {
   const orderInFlight = useRef(false);
   const [scanPorts, setScanPorts] = useState('22,80,443');
   const [pingCount, setPingCount] = useState(4);
+  const [dnsServer, setDnsServer] = useState('8.8.8.8');
+  const [dnsType, setDnsType] = useState('A');
   const [destinationAgent, setDestinationAgent] = useState('');
   const [iperfPort, setIperfPort] = useState(5201);
   const [duration, setDuration] = useState(10);
@@ -159,6 +161,8 @@ function App() {
           await createNmap(token, sourceAgent, target.trim(), ports);
         } else if (engine === 'ping') {
           await createPing(token, sourceAgent, target.trim(), pingCount);
+        } else if (engine === 'dns') {
+          await createDns(token, sourceAgent, target.trim(), dnsServer.trim(), dnsType);
         } else {
           await createTraceroute(token, sourceAgent, target.trim());
         }
@@ -353,12 +357,13 @@ function App() {
                   <div className="combo-grid">{combos.map((combo) => <button className="combo-button" type="button" key={combo.name} onClick={() => chooseCombo(combo)}><strong>{combo.name}</strong><small>{combo.description}</small></button>)}</div>
                   <fieldset className="tool-selector"><legend>Pick your patties <span>Tools</span></legend><div className="tool-grid">{tools.map((tool) => <label className={`tool-choice ${engines.includes(tool.id) ? 'selected' : ''}`} key={tool.id}><input type="checkbox" checked={engines.includes(tool.id)} onChange={(event) => chooseEngines(event.target.checked ? [...engines, tool.id] : engines.filter((engine) => engine !== tool.id))} /><span><strong>{tool.name}</strong><small>{tool.description}</small></span></label>)}</div></fieldset>
                   <label htmlFor="source-agent">Source agent <span>Must support every selected tool</span></label><select id="source-agent" value={sourceAgent} onChange={(event) => { setSourceAgent(event.target.value); setDestinationAgent(''); }} required><option value="">Select an agent</option>{agents.filter((agent) => agent.status === 'online' && eligibleSource(engines, agent.available_engines)).map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}</select>
-                  <label htmlFor="target">Destination hostname or IP</label><input id="target" value={target} onChange={(event) => setTarget(event.target.value)} maxLength={253} required />
+                  <label htmlFor="target">Destination hostname or IP {engines.includes('dns') && <span>(DNS query name for DNS)</span>}</label><input id="target" value={target} onChange={(event) => setTarget(event.target.value)} maxLength={253} required />
                   <p className="order-label">ADD YOUR TOPPINGS <span>Tool settings</span></p>
                   {engines.includes('mtr') && <section className="topping"><h3>MTR</h3><label htmlFor="cycles">Probe cycles (1–20)</label><input id="cycles" type="number" min={1} max={20} value={cycles} onChange={(event) => setCycles(Number(event.target.value))} required /></section>}
                   {engines.includes('nmap') && <section className="topping"><h3>Nmap</h3><p>TCP connect scan of one authorized host using the <a href="https://nmap.org/" target="_blank" rel="noopener noreferrer">Nmap Security Scanner</a>. Results can be affected by firewalls; no service version detection is performed.</p><label htmlFor="scan-ports">TCP ports (1–100 comma-separated numbers)</label><input id="scan-ports" value={scanPorts} onChange={(event) => setScanPorts(event.target.value)} required /></section>}
                   {engines.includes('ping') && <section className="topping"><h3>Ping</h3><label htmlFor="ping-count">ICMP probes (1–10)</label><input id="ping-count" type="number" min={1} max={10} value={pingCount} onChange={(event) => setPingCount(Number(event.target.value))} required /></section>}
                   {engines.includes('traceroute') && <section className="topping"><h3>Traceroute</h3><p>UDP traceroute, up to 30 hops. Firewalls may block probes or replies.</p></section>}
+                  {engines.includes('dns') && <section className="topping"><h3>DNS</h3><p>Query the destination name using the selected DNS server. Other tools use the agent's system resolver, not this server.</p><label htmlFor="dns-server">DNS server IPv4 or IPv6 address</label><input id="dns-server" value={dnsServer} onChange={(event) => setDnsServer(event.target.value)} maxLength={45} required /><label htmlFor="dns-type">DNS record type</label><select id="dns-type" value={dnsType} onChange={(event) => setDnsType(event.target.value)}>{['A', 'AAAA', 'CNAME', 'MX', 'NS', 'SOA', 'TXT'].map((type) => <option key={type} value={type}>{type}</option>)}</select></section>}
                   {engines.includes('iperf3') && <section className="topping"><h3>iPerf3</h3><p>iPerf3 may saturate the network link. Managed receivers are unauthenticated; restrict access to the selected port.</p><label htmlFor="destination-agent">Receiver</label><select id="destination-agent" value={destinationAgent} onChange={(event) => setDestinationAgent(event.target.value)}><option value="">Existing external iPerf3 server</option>{agents.filter((agent) => agent.id !== sourceAgent && agent.status === 'online' && agent.available_engines.includes('iperf3')).map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}</select><label htmlFor="iperf-port">Receiver TCP port</label><input id="iperf-port" type="number" min={1024} max={65535} value={iperfPort} onChange={(event) => setIperfPort(Number(event.target.value))} required /><label htmlFor="duration">Duration in seconds (1–60)</label><input id="duration" type="number" min={1} max={60} value={duration} onChange={(event) => setDuration(Number(event.target.value))} required /></section>}
                   {engines.includes('sipp') && <section className="topping"><h3>SIPp</h3><p>SIPp stops after 80 seconds; configure the call count and rate accordingly.</p><label htmlFor="sip-port">SIP UDP port</label><input id="sip-port" type="number" min={1} max={65535} value={sipPort} onChange={(event) => setSipPort(Number(event.target.value))} required /><label htmlFor="service">SIP request URI user</label><input id="service" value={service} onChange={(event) => setService(event.target.value)} maxLength={64} required /><label htmlFor="calls">Total calls (1–1000)</label><input id="calls" type="number" min={1} max={1000} value={calls} onChange={(event) => setCalls(Number(event.target.value))} required /><label htmlFor="rate">Call rate per second (1–20)</label><input id="rate" type="number" min={1} max={20} value={rate} onChange={(event) => setRate(Number(event.target.value))} required /><label htmlFor="concurrency">Maximum concurrent calls (1–100)</label><input id="concurrency" type="number" min={1} max={100} value={concurrency} onChange={(event) => setConcurrency(Number(event.target.value))} required /></section>}
                   <p className="order-help">Tests share this source and destination, but are queued and reported separately. Long orders can cause queued tests to expire after five minutes.</p>
@@ -416,6 +421,7 @@ function ToolReport({ engine, report }: { engine: string; report: unknown }) {
   return <div>
     {engine === 'iperf3' && typeof received.bits_per_second === 'number' && <p>Receiver throughput: {(received.bits_per_second / 1_000_000).toFixed(2)} Mbps</p>}
     {engine === 'sipp' && <p>Successful calls: {String(data.successful_calls ?? '—')} · Failed calls: {String(data.failed_calls ?? '—')}</p>}
+    {engine === 'dns' && <><p>DNS server: {String(data.server ?? '—')} · Record type: {String(data.record_type ?? '—')} · Response: {String(data.status ?? '—')} · Answer records: {String(data.answer_count ?? '—')}</p>{data.answer_count === 0 && <p>No answer records were returned; a successful response does not imply the requested record exists.</p>}{typeof data.output === 'string' && <pre style={{ overflowX: 'auto', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{data.output}</pre>}</>}
     {engine === 'nmap' && <><p>Scanned address: {Array.isArray(data.addresses) ? data.addresses.join(', ') : '—'}</p><div className="table-scroll"><table><thead><tr><th>PORT</th><th>STATE</th><th>SERVICE (GUESS)</th></tr></thead><tbody>{Array.isArray(data.ports) && data.ports.filter((port): port is Record<string, unknown> => !!port && typeof port === 'object').map((port, index) => <tr key={index}><td>{String(port.port ?? '—')}/tcp</td><td>{String(port.state ?? '—')}</td><td>{String(port.service ?? '—')}</td></tr>)}</tbody></table></div>{Array.isArray(data.other_ports) && data.other_ports.filter((group): group is Record<string, unknown> => !!group && typeof group === 'object').map((group, index) => <p key={index}>{String(group.count ?? '—')} other ports: {String(group.state ?? '—')}</p>)}</>}
     {(engine === 'ping' || engine === 'traceroute') && typeof data.output === 'string' && <pre style={{ overflowX: 'auto', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{data.output}</pre>}
     <details><summary>View raw JSON</summary><pre style={{ overflowX: 'auto', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{JSON.stringify(report, null, 2)}</pre></details>

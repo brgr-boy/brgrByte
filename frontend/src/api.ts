@@ -66,5 +66,8 @@ export const createPing = (token: string, source_agent_id: string, target: strin
 export const createTraceroute = (token: string, source_agent_id: string, target: string) =>
   request<TestSession>('/api/v1/tests/traceroute', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target }) });
 
+export const createDns = (token: string, source_agent_id: string, target: string, server: string, record_type: string) =>
+  request<TestSession>('/api/v1/tests/dns', token, { method: 'POST', body: JSON.stringify({ source_agent_id, target, server, record_type }) });
+
 export const createSite = (token: string, site: Pick<Site, 'name' | 'region' | 'category'>) =>
   request<Site>('/api/v1/sites', token, { method: 'POST', body: JSON.stringify(site) });

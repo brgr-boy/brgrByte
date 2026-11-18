@@ -26,13 +26,74 @@ def poll(client, auth):
             "os_name": "Linux",
             "architecture": "arm64",
             "mtr_available": True,
-            "available_engines": ["mtr", "iperf3", "sipp", "nmap", "ping", "traceroute"],
+            "available_engines": ["mtr", "iperf3", "sipp", "nmap", "ping", "traceroute", "dns"],
         },
     )
 
 
 def send(client, job, auth, result):
     return client.post(f"/api/v1/agent/jobs/{job}/result", headers=auth, json=result)
+
+
+def test_dns_job_defaults_custom_server_validation_and_results(client):
+    source_id, source = new_agent(client, "dns-source")
+    user = headers(client)
+    base = {"source_agent_id": source_id, "target": "example.com"}
+    created = client.post("/api/v1/tests/dns", headers=user, json=base)
+    assert created.status_code == 201
+    job = poll(client, source).json()["job"]
+    assert job["engine"] == "dns"
+    assert job["server"] == "8.8.8.8" and job["record_type"] == "A"
+    report = {"server": job["server"], "status": "NOERROR", "output": "answer"}
+    assert send(client, job["id"], source, {"success": True, "report": report}).status_code == 204
+    result = client.get("/api/v1/tests", headers=user).json()[0]
+    assert result["results"][0]["metrics"]["report"] == report
+
+    custom = client.post(
+        "/api/v1/tests/dns",
+        headers=user,
+        json={
+            **base,
+            "target": "_dmarc.example.com",
+            "server": "2001:4860:4860::8888",
+            "record_type": "TXT",
+        },
+    )
+    assert custom.status_code == 201
+    job = poll(client, source).json()["job"]
+    assert job["server"] == "2001:4860:4860::8888" and job["record_type"] == "TXT"
+    assert job["target"] == "_dmarc.example.com"
+    report = {"status": "NXDOMAIN", "output": "no such name"}
+    assert (
+        send(
+            client,
+            job["id"],
+            source,
+            {"success": False, "error": "DNS response: NXDOMAIN", "report": report},
+        ).status_code
+        == 204
+    )
+    result = client.get("/api/v1/tests", headers=user).json()[0]
+    assert result["status"] == "FAILED" and result["results"][0]["metrics"]["report"] == report
+    for invalid in (
+        {"server": "resolver.example"}, {"server": "fe80::1%eth0"},
+        {"record_type": "ANY"}, {"target": "-bad"}, {"target": "::1"},
+    ):
+        response = client.post("/api/v1/tests/dns", headers=user, json={**base, **invalid})
+        assert response.status_code == 422
+    assert client.post("/api/v1/tests/dns", json=base).status_code == 401
+    with SessionLocal.begin() as db:
+        db.add(
+            User(username="dns-viewer", role="viewer", password_hash=hash_password("test-password"))
+        )
+    viewer = headers(client, "dns-viewer", "test-password")
+    assert client.post("/api/v1/tests/dns", headers=viewer, json=base).status_code == 403
+    client.post(
+        "/api/v1/agent/poll", headers=source,
+        json={"hostname": "host", "os_name": "Linux", "architecture": "arm64",
+              "mtr_available": True, "available_engines": ["mtr"]},
+    )
+    assert client.post("/api/v1/tests/dns", headers=user, json=base).status_code == 409
 
 
 def test_iperf_agent_receiver_then_source_then_both_results(client):

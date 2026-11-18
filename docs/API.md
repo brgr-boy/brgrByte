@@ -20,6 +20,7 @@ Base prefix: `/api/v1`. Except for health checks and login, endpoints require `A
 | `POST` | `/api/v1/tests/nmap` | Queue a single-host TCP connect scan of 1–100 distinct `ports` (default `[22, 80, 443]`) |
 | `POST` | `/api/v1/tests/ping` | Queue ICMP ping to a single host with `count` from 1–10 (default 4) |
 | `POST` | `/api/v1/tests/traceroute` | Queue a single-host UDP traceroute, up to 30 hops |
+| `POST` | `/api/v1/tests/dns` | Query a DNS name using `server` (IPv4/IPv6 address, default `8.8.8.8`) and `record_type` (default `A`) |
 | `GET` | `/api/v1/tests` | List the latest 100 sessions and persisted results |
 | `POST` | `/api/v1/agent/poll` | Agent heartbeat and claim of queued work |
 | `POST` | `/api/v1/agent/jobs/{id}/result` | Agent submits the result of its own running job |
@@ -27,4 +28,6 @@ Base prefix: `/api/v1`. Except for health checks and login, endpoints require `A
 
 The agent endpoints use the provisioned agent credential as a bearer token, not a user JWT. Do not expose credentials in URLs or logs. `GET /health/live` and `GET /health/ready` expose only service availability, not administrative functionality. General cancellation, WebSockets, and export endpoints are not available.
 
-The three network test endpoints require `source_agent_id` and `target` (a single hostname or IP, not a subnet). Only administrators and operators can create tests. Nmap records port states and port-based service guesses; no version detection is performed. Ping failures can retain output, and a completed traceroute does not necessarily mean the target responded.
+The test endpoints require `source_agent_id` and `target` (a single hostname or IP, not a subnet; DNS requires a DNS name and permits underscores). Only administrators and operators can create tests. Nmap records port states and port-based service guesses; no version detection is performed. Ping failures can retain output, and a completed traceroute does not necessarily mean the target responded.
+
+DNS accepts record types `A`, `AAAA`, `CNAME`, `MX`, `NS`, `SOA`, and `TXT`. The server must be an unscoped IP address, not a hostname, and is queried on port 53. `NOERROR` means a response was received, not necessarily that the requested record exists; inspect `answer_count` and the saved output. Other response codes, timeouts, missing tools, and malformed responses fail the test. The answer count includes all records in the answer section, including CNAMEs.

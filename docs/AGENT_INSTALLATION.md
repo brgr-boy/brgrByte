@@ -4,7 +4,7 @@
 
 The cross-platform launcher in [getting started](GETTING_STARTED.md) can configure and start the agent automatically. On Windows it runs inside Docker Desktop's Linux environment, with different network paths and limited raw ICMP support; enable Docker Desktop host networking and use native Linux for host-level ICMP measurements.
 
-The agent image includes Python, Debian's `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, and `traceroute` packages, and CA certificates. Building it downloads these packages; their source and binaries are not vendored in this repository. The image supports the architectures provided by the Python base image and Debian's packages, including Linux ARM64, but has not yet been validated on Raspberry Pi hardware. See `/usr/share/doc/<package>/copyright` in the image for licensing and source information. Rebuild and restart an existing image to install new tools.
+The agent image includes Python, Debian's `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, `traceroute`, and `dnsutils` (providing `dig`) packages, and CA certificates. Building it downloads these packages; their source and binaries are not vendored in this repository. The image supports the architectures provided by the Python base image and Debian's packages, including Linux ARM64, but has not yet been validated on Raspberry Pi hardware. See `/usr/share/doc/<package>/copyright` in the image for licensing and source information. Rebuild and restart an existing image to install new tools.
 
 BrgrByte wraps these separately licensed tools; it invokes them and collects their output. It uses the [Nmap Security Scanner](https://nmap.org/) for TCP scans. Redistribution of a BrgrByte image containing Nmap has not been cleared: see the [license and third-party tools](../README.md#license-and-third-party-tools) section before distributing one. The container pins Debian `nmap` and `nmap-common` to `7.95+dfsg-3`; a build fails if that version is no longer available. Update the pin and notices together after review. Native installations can use a different version and require their own license review.
 
@@ -38,6 +38,8 @@ SIPp uses its built-in unauthenticated UAC scenario over UDP: it sends INVITE, w
 
 Nmap uses a TCP connect scan against a single host and up to 100 selected ports, without service-version detection. Ping uses 1–10 ICMP probes, and traceroute uses UDP with up to 30 hops. Scan and probe only authorized systems. Ping requires suitable ICMP permissions; Docker Desktop may not support ICMP from the agent container. A completed traceroute does not imply the destination replied.
 
+DNS uses `dig` to query a selected DNS server on port 53, defaulting to `8.8.8.8`. A `NOERROR` response can have no answers; inspect the answer count and output. It does not configure the resolver used by other tools.
+
 The container uses Linux host networking, so probes originate in the host network namespace rather than traversing a Docker bridge. There are no published ports. The process runs as UID 10001, with all container capabilities dropped except `NET_RAW`; only the bundled `mtr-packet` helper is setuid root so it can acquire that capability. Do not add `no-new-privileges` or remove `NET_RAW` without providing another supported way for MTR to send probes. This setup may not work under rootless Docker, user namespaces, or restrictive security policies. Do not use `--privileged`. Docker access and the `.env` file grant access to the agent credential.
 
 ## Native Debian installation
@@ -45,11 +47,11 @@ The container uses Linux host networking, so probes originate in the host networ
 The agent is a Python standard-library process for Linux hosts. The example below targets Debian with systemd; the service account must be able to run the distribution's `mtr` and its `mtr-packet` helper with the permissions required for ICMP probes. No agent listener is required. A live Debian ARM64 deployment has not yet been validated.
 
 1. Deploy the control center behind a trusted HTTPS reverse proxy. Create an agent on the Agents page as an administrator and copy its one-time credential. Each site needs a distinct agent and credential.
-2. On the site host, install `python3`, `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, and `traceroute` using the system package manager. Copy this repository's `agent/networkpath_agent.py` and `agent/networkpath-agent.service` to the host. For example, from a checkout on the host:
+2. On the site host, install `python3`, `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, `traceroute`, and `dnsutils` using the system package manager. Copy this repository's `agent/networkpath_agent.py` and `agent/networkpath-agent.service` to the host. For example, from a checkout on the host:
 
    ```sh
    sudo apt update
-   sudo apt install python3 mtr-tiny iperf3 sip-tester nmap iputils-ping traceroute
+   sudo apt install python3 mtr-tiny iperf3 sip-tester nmap iputils-ping traceroute dnsutils
    sudo useradd --system --no-create-home --shell /usr/sbin/nologin networkpath
    sudo install -d -m 755 /opt/networkpath
    sudo install -m 644 agent/networkpath_agent.py /opt/networkpath/networkpath_agent.py

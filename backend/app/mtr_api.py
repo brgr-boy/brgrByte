@@ -19,6 +19,7 @@ from app.schemas import (
     AgentCreated,
     AgentPoll,
     AgentResult,
+    DnsCreate,
     IperfCreate,
     MtrCreate,
     NmapCreate,
@@ -159,7 +160,8 @@ def poll_agent(request: AgentPoll, agent: AgentIdentity, db: DbSession) -> dict:
     agent.version = "0.1.0"
     agent.available_engines = (
         sorted(
-            set(request.available_engines) & {"mtr", "iperf3", "sipp", "nmap", "ping", "traceroute"}
+            set(request.available_engines)
+            & {"mtr", "iperf3", "sipp", "nmap", "ping", "traceroute", "dns"}
         )
         if request.available_engines is not None
         else (["mtr"] if request.mtr_available else [])
@@ -350,7 +352,7 @@ def create_mtr(request: MtrCreate, user: AuthenticatedUser, db: DbSession) -> Te
 
 def create_tool_test(
     engine: str,
-    request: IperfCreate | SippCreate | NmapCreate | PingCreate | TracerouteCreate,
+    request: IperfCreate | SippCreate | NmapCreate | PingCreate | TracerouteCreate | DnsCreate,
     user: AuthenticatedUser,
     db: DbSession,
 ) -> TestSession:
@@ -420,6 +422,11 @@ def create_traceroute(
     request: TracerouteCreate, user: AuthenticatedUser, db: DbSession
 ) -> TestSession:
     return create_tool_test("traceroute", request, user, db)
+
+
+@router.post("/tests/dns", response_model=TestResponse, status_code=201)
+def create_dns(request: DnsCreate, user: AuthenticatedUser, db: DbSession) -> TestSession:
+    return create_tool_test("dns", request, user, db)
 
 
 @router.get("/tests", response_model=list[TestResponse])

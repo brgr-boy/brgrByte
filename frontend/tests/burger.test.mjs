@@ -23,6 +23,9 @@ test('combos name real tools and require every tool on the source', () => {
     assert.equal(eligibleSource(combo.engines, combo.engines.slice(1)), false);
   }
   assert.equal(eligibleSource([], ['ping']), false);
+  assert.ok(known.has('dns'));
+  assert.ok(eligibleSource(['ping', 'dns'], ['ping', 'dns']));
+  assert.equal(eligibleSource(['ping', 'dns'], ['ping']), false);
 });
 
 test('orders queue one request per tool and retain partial failures', async () => {

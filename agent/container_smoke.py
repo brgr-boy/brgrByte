@@ -2,12 +2,16 @@
 
 import os
 import socket
+import struct
 import subprocess
+import threading
 import time
+from unittest.mock import patch
 
 import networkpath_agent as agent
 
 assert os.geteuid() != 0
+subprocess.run(["dig", "-v"], capture_output=True, text=True, check=True)
 for package in ("nmap", "nmap-common"):
     version = subprocess.run(
         ["dpkg-query", "-W", "-f=${Version}", package],
@@ -25,6 +29,39 @@ ping = agent.run_ping({"target": "127.0.0.1", "count": 1})
 assert ping["success"] and "1 received" in ping["report"]["output"], ping
 trace = agent.run_traceroute({"target": "127.0.0.1"})
 assert trace["success"] and "127.0.0.1" in trace["report"]["output"], trace
+
+with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as dns_socket:
+    dns_socket.bind(("127.0.0.1", 0))
+    dns_socket.settimeout(10)
+    dns_port = dns_socket.getsockname()[1]
+
+    def respond_to_dns():
+        query, peer = dns_socket.recvfrom(4096)
+        end = 12
+        while query[end]:
+            end += 1 + query[end]
+        end += 5
+        header = query[:2] + struct.pack("!HHHHH", 0x8180, 1, 1, 0, 0)
+        answer = b"\xc0\x0c" + struct.pack("!HHIH", 1, 1, 60, 4) + socket.inet_aton("192.0.2.1")
+        dns_socket.sendto(header + query[12:end] + answer, peer)
+
+    responder = threading.Thread(target=respond_to_dns)
+    responder.start()
+    real_run = subprocess.run
+
+    def run_on_test_port(args, **kwargs):
+        return real_run([*args[:2], "-p", str(dns_port), *args[2:]], **kwargs)
+
+    try:
+        with patch.object(agent.subprocess, "run", side_effect=run_on_test_port):
+            dns = agent.run_dns(
+                {"target": "example.test", "server": "127.0.0.1", "record_type": "A"}
+            )
+        assert dns["success"] and dns["report"]["answer_count"] == 1, dns
+        assert "192.0.2.1" in dns["report"]["output"], dns
+    finally:
+        responder.join(timeout=11)
+
 with socket.socket() as listener:
     listener.bind(("127.0.0.1", 0))
     listener.listen()

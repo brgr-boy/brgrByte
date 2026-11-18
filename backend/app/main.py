@@ -8,6 +8,7 @@ from app.api import router
 from app.config import get_settings
 from app.database import SessionLocal, engine
 from app.models import User
+from app.mtr_api import router as mtr_router
 from app.security import hash_password
 
 settings = get_settings()
@@ -34,7 +35,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="NetworkPath Control Center", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="BrgrByte Control Center", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.parsed_cors_origins,
@@ -43,6 +44,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.include_router(router)
+app.include_router(mtr_router)
 
 
 @app.get("/health/live", include_in_schema=False)

@@ -63,6 +63,7 @@ class Agent(Base):
     cpu_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
     memory_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
     available_engines: Mapped[list[str]] = mapped_column(JSON, default=list)
+    credential_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     site: Mapped[Site | None] = relationship(back_populates="agents")
 
 
@@ -90,6 +91,7 @@ class TestSession(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     results: Mapped[list["TestResult"]] = relationship(
         back_populates="test_session", cascade="all, delete-orphan"

@@ -6,10 +6,10 @@
 cd backend
 pip install -r requirements-dev.txt
 pytest -q
-ruff check app migrations tests
+ruff check app migrations tests ..\agent ..\start.py
 ```
 
-The API tests use an isolated SQLite database and exercise health endpoints, login, authorization boundaries, site creation, and overview counts. They mock no live network calls because this foundation performs none.
+The API tests use an isolated SQLite database and exercise inventory, authorization, test orchestration, agent identity, revocation, and result persistence. Agent subprocess tests mock the tools; they do not prove live network measurements.
 
 To check the schema migration against PostgreSQL, provide a disposable PostgreSQL database through `NETWORKPATH_DATABASE_URL` and run `alembic upgrade head` from `backend`. The unit tests do not demonstrate connectivity to Raspberry Pi agents or validate network testing engines.
 
@@ -18,7 +18,8 @@ To check the schema migration against PostgreSQL, provide a disposable PostgreSQ
 ```powershell
 cd frontend
 npm ci
+npm test
 npm run build
 ```
 
-The production build includes TypeScript project checks. CI runs backend tests/lint and the frontend production build. Docker image builds and hardware integration tests require environments not available in all development setups.
+The production build includes TypeScript project checks. CI builds the agent image and runs loopback MTR, iPerf3, SIPp, Nmap, ping, and traceroute smoke tests as its non-root user with the documented capabilities. PostgreSQL concurrency and real network and ARM64 hardware integration require additional live environments.

@@ -16,7 +16,7 @@ jobs:
           cache-dependency-path: backend/requirements-dev.txt
       - run: pip install -r requirements-dev.txt
         working-directory: backend
-      - run: ruff check app migrations tests
+      - run: ruff check app migrations tests ../agent ../start.py
         working-directory: backend
       - run: pytest -q
         working-directory: backend
@@ -39,6 +39,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
         working-directory: frontend
+      - run: npm test
+        working-directory: frontend
       - run: npm run build
         working-directory: frontend
 
@@ -55,3 +57,13 @@ jobs:
         with:
           context: ./frontend
           push: false
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./agent
+          tags: networkpath-agent:ci
+          load: true
+      - name: Smoke test packaged tools in non-root agent container
+        run: |
+          docker run --rm --cap-drop ALL --cap-add NET_RAW --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=32m \
+            --entrypoint python networkpath-agent:ci /app/container_smoke.py

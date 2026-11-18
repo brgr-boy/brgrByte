@@ -1,0 +1,20 @@
+[Unit]
+Description=BrgrByte test agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=networkpath
+Group=networkpath
+EnvironmentFile=/etc/networkpath/agent.env
+ExecStart=/usr/bin/python3 /opt/networkpath/networkpath_agent.py
+Restart=always
+RestartSec=5
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

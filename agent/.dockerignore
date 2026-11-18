@@ -1,0 +1,4 @@
+*
+!Dockerfile
+!networkpath_agent.py
+!container_smoke.py

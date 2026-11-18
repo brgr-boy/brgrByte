@@ -1,52 +1,15 @@
 # Architecture
 
-## Components and trust boundaries
+The Docker Compose control center consists of a React frontend, FastAPI API, and PostgreSQL. A separately installed site agent polls the API over outbound HTTPS using its own credential; MTR probe traffic goes directly from the agent to the target, not through the control center. HTTP is allowed by the agent only for localhost. The production reverse proxy and its TLS certificate are the deployer's responsibility.
 
-```mermaid
-flowchart LR
-  Browser -->|HTTPS in production / HTTP local| API[FastAPI control plane]
-  API --> DB[(PostgreSQL)]
-  AgentA[Source agent] <-->|Authenticated outbound management WebSocket| API
-  AgentB[Destination agent] <-->|Authenticated outbound management WebSocket| API
-  AgentA ==>|Direct test traffic; separate data plane| AgentB
-```
+The site agent can run in its own Linux container image, which packages Debian MTR, iPerf3, SIPp, Nmap, ping and traceroute alongside the agent. The provided Compose configuration uses host networking and grants the raw-socket capability needed for ICMP probes. The control center does not execute the probes.
 
-The browser uses a JWT-authenticated REST API. The control center owns inventory, coordination, and result persistence. Agents are intended to initiate authenticated outbound management connections; agent-to-agent test packets must not be proxied through the control center. Agent transport and test execution are not implemented in the foundation release.
+An administrator provisions a credential once; only its SHA-256 digest is stored. An agent advertises MTR availability and polls for work. Operators create bounded MTR jobs against hostnames or IPs, and an agent atomically claims its own queued jobs. The agent invokes a fixed argument vector without a shell, parses MTR JSON, and sends either measurements or an error. The API persists the result and terminal state together. The dashboard displays recent reports and raw JSON.
 
-## Test orchestration target
+Jobs move from `CREATED` to `RUNNING` to `COMPLETED` or `FAILED`. For a managed iPerf3 receiver, the destination claims the job, starts a one-off server and confirms its own listening socket before the job becomes `READY` and the source can claim it. Both agent reports are required for completion. An external iPerf3 server does not have a managed receiver report. The operator supplies the destination's reachable address; readiness does not establish that the address resolves to that agent or prevent another client using the unauthenticated receiver.
 
-```mermaid
-sequenceDiagram
-  actor Engineer
-  participant API as Control center
-  participant DB as PostgreSQL
-  participant Dest as Destination agent
-  participant Src as Source agent
-  Engineer->>API: Create test request
-  API->>DB: Persist CREATED session
-  API->>Dest: Prepare receiver (management channel)
-  Dest-->>API: READY / preparation error
-  API->>Src: Execute test against destination directly
-  Src-->>API: Progress and source measurements
-  Dest-->>API: Receiver measurements (where applicable)
-  API->>DB: Persist terminal state and results
-  API-->>Engineer: Completion update
-```
+A queued job expires after five minutes, and a preparing, ready or running job after 150 seconds; expiration is applied on subsequent API activity. Revocation cancels outstanding jobs but does not stop already running processes. MTR is limited to 90 seconds and 1–20 cycles; `COMPLETED` means a report was collected, not that the destination responded. Intermediary ICMP rate limiting and firewalls can distort hop loss. iPerf3 is TCP-only and runs for 1–60 seconds. SIPp runs a basic UDP UAC scenario without authentication, up to 1000 calls, 20 calls per second, 100 concurrent calls, and an 80-second timeout. Calls must all succeed for the session to complete successfully.
 
-Persisted test states are constrained to `CREATED`, `PREPARING`, `READY`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED`, and `TIMEOUT`. Dispatch success alone must never mean a test succeeded.
+Nmap performs TCP connect scans of one host and at most 100 selected ports, with an 80-second host timeout. Ping sends up to 10 ICMP probes and retains output on failure. Traceroute sends UDP probes with a 30-hop limit. These tools have 90-second subprocess timeouts; traceroute completion means output was collected, not that the target replied.
 
-## Agent registration target
-
-```mermaid
-sequenceDiagram
-  participant Agent
-  participant API as Control center
-  participant DB as PostgreSQL
-  Agent->>API: Authenticated registration request
-  API->>DB: Validate unique credential and record inventory
-  API-->>Agent: Agent identity and rotated credential
-  Agent->>API: Outbound authenticated WebSocket
-  API-->>Agent: Heartbeat acknowledgement / test instruction
-```
-
-Registration, credential issuance/rotation, WebSockets, and heartbeat processing are future work. The initial schema defines inventory fields but does not yet provision agent credentials.
+This first transport uses polling rather than the earlier planned WebSocket. Agent credential rotation, persistent agent-side result queues, scheduling, exports, UDP iPerf3, authenticated/custom SIP scenarios, RTP media testing, and real-time updates remain future work.

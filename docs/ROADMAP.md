@@ -10,10 +10,10 @@
 
 ## Next increments
 
-1. Agent identity and credential issuance/rotation; authenticated outbound WebSocket; heartbeat, health metrics, reconnect, and systemd installer for Debian 13 ARM64.
-2. Engine plugin interface and safe ICMP, TCP, DNS, TLS, and receiver-backed UDP execution with unit tests.
-3. Persisted test orchestration, cancellation/timeouts, result ingestion, and real-time dashboard updates.
-4. iPerf3 execution and analytics, followed by SIPp integration.
-5. User/role administration, audit trail, scheduling/profiles, exports, and production hardening.
+1. Validate the packaged agent on Debian ARM64; add credential rotation and durable result delivery.
+2. Validate iPerf3 and SIPp on real networks; add UDP throughput, authenticated and custom SIP scenarios, and media testing.
+3. Engine plugin interface and safe TCP, DNS, TLS, and receiver-backed UDP execution.
+4. General test cancellation, real-time dashboard updates, scheduling/profiles, and exports.
+5. User/role administration, expanded audit coverage, and production hardening.
 
 Each network engine must report measured receiver/source results honestly and distinguish unavailable network access from successful dispatch.

@@ -32,3 +32,15 @@ export interface Agent {
   memory_percent: number | null;
   available_engines: string[];
 }
+
+export interface TestSession {
+  id: string;
+  source_agent_id: string | null;
+  destination_agent_id: string | null;
+  engine: string;
+  status: string;
+  configuration: { target?: string; cycles?: number };
+  created_at: string;
+  completed_at: string | null;
+  results: { agent_id: string | null; success: boolean; error: string | null; metrics: Record<string, unknown>; created_at: string }[];
+}

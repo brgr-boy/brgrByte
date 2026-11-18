@@ -1,0 +1,16 @@
+services:
+  agent:
+    build:
+      context: .
+    image: networkpath-agent:local
+    env_file:
+      - .env
+    network_mode: host
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    restart: unless-stopped

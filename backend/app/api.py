@@ -56,6 +56,9 @@ def login(request: LoginRequest, db: DbSession) -> TokenResponse:
 
 @router.get("/overview", response_model=OverviewResponse)
 def overview(_: AuthenticatedUser, db: DbSession) -> OverviewResponse:
+    from app.mtr_api import expire_stale
+
+    expire_stale(db)
     return OverviewResponse(
         total_sites=db.scalar(select(func.count()).select_from(Site)) or 0,
         total_agents=db.scalar(select(func.count()).select_from(Agent)) or 0,
@@ -107,6 +110,9 @@ def create_site(request: SiteCreate, user: AuthenticatedUser, db: DbSession) -> 
 
 @router.get("/agents", response_model=list[AgentResponse])
 def list_agents(_: AuthenticatedUser, db: DbSession) -> list[Agent]:
+    from app.mtr_api import expire_stale
+
+    expire_stale(db)
     return list(db.scalars(select(Agent).order_by(Agent.name)))
 
 

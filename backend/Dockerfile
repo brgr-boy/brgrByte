@@ -10,8 +10,8 @@ COPY alembic.ini .
 COPY migrations ./migrations
 COPY app ./app
 
-RUN useradd --create-home --uid 10001 networkpath
-USER networkpath
+RUN useradd --create-home --uid 10001 brgrbyte
+USER brgrbyte
 
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

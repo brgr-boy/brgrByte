@@ -27,7 +27,8 @@ def docker_env():
     return {
         key: value
         for key, value in os.environ.items()
-        if not key.startswith(("NETWORKPATH_", "POSTGRES_")) and key != "VITE_API_BASE_URL"
+        if not key.startswith(("BRGRBYTE_", "NETWORKPATH_", "POSTGRES_"))
+        and key != "VITE_API_BASE_URL"
     }
 
 
@@ -84,13 +85,14 @@ def setup_dashboard():
     if password != getpass.getpass("Confirm administrator password: "):
         raise ValueError("Passwords do not match.")
     contents = (
-        f"NETWORKPATH_JWT_SECRET_KEY={secrets.token_urlsafe(48)}\n"
-        f"NETWORKPATH_ADMIN_USERNAME={username}\n"
-        f"NETWORKPATH_ADMIN_PASSWORD={password}\n"
-        "NETWORKPATH_CORS_ORIGINS=http://localhost:8080,http://localhost:5173\n"
-        "POSTGRES_USER=networkpath\n"
+        f"BRGRBYTE_JWT_SECRET_KEY={secrets.token_urlsafe(48)}\n"
+        f"BRGRBYTE_ADMIN_USERNAME={username}\n"
+        f"BRGRBYTE_ADMIN_PASSWORD={password}\n"
+        "BRGRBYTE_CORS_ORIGINS=http://localhost:8080,http://localhost:5173\n"
+        "BRGRBYTE_POSTGRES_VOLUME=brgrbyte-postgres\n"
+        "POSTGRES_USER=brgrbyte\n"
         f"POSTGRES_PASSWORD={secrets.token_urlsafe(32)}\n"
-        "POSTGRES_DB=networkpath\n"
+        "POSTGRES_DB=brgrbyte\n"
     )
     private_create(path, contents)
     print(f"Created {path}. Protect this file; it contains secrets.")
@@ -193,7 +195,7 @@ def setup_agent(combined, dashboard_credentials=None):
                 credential,
             ):
                 raise RuntimeError("Control center returned an invalid agent credential.")
-            stream.write(f"NETWORKPATH_URL={url}\nNETWORKPATH_AGENT_CREDENTIAL={credential}\n")
+            stream.write(f"BRGRBYTE_URL={url}\nBRGRBYTE_AGENT_CREDENTIAL={credential}\n")
         saved = True
     finally:
         if not saved:

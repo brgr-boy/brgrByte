@@ -8,7 +8,7 @@ import threading
 import time
 from unittest.mock import patch
 
-import networkpath_agent as agent
+import brgrbyte_agent as agent
 
 assert os.geteuid() != 0
 subprocess.run(["dig", "-v"], capture_output=True, text=True, check=True)

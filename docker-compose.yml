@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-networkpath}
     volumes:
-      - networkpath-postgres:/var/lib/postgresql/data
+      - brgrbyte-postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
@@ -17,12 +17,10 @@ services:
   api:
     build:
       context: ./backend
+    env_file:
+      - .env
     environment:
-      NETWORKPATH_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-networkpath}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-networkpath}
-      NETWORKPATH_JWT_SECRET_KEY: ${NETWORKPATH_JWT_SECRET_KEY:?Set NETWORKPATH_JWT_SECRET_KEY in .env}
-      NETWORKPATH_ADMIN_USERNAME: ${NETWORKPATH_ADMIN_USERNAME:?Set NETWORKPATH_ADMIN_USERNAME in .env}
-      NETWORKPATH_ADMIN_PASSWORD: ${NETWORKPATH_ADMIN_PASSWORD:?Set NETWORKPATH_ADMIN_PASSWORD in .env}
-      NETWORKPATH_CORS_ORIGINS: ${NETWORKPATH_CORS_ORIGINS:-http://localhost:8080}
+      BRGRBYTE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-networkpath}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-networkpath}
     ports:
       - "8000:8000"
     healthcheck:
@@ -55,4 +53,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  networkpath-postgres:
+  brgrbyte-postgres:
+    name: ${BRGRBYTE_POSTGRES_VOLUME:-${COMPOSE_PROJECT_NAME:-brgrbyte}_networkpath-postgres}

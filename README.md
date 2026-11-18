@@ -22,7 +22,7 @@ brgrByte also includes Chef and site inventory, role-based access, credential pr
 
 ## How it works
 
-![The Order Window dashboard coordinating Chef site agents and network tests](docs/images/networkpath-architecture.svg)
+![The Order Window dashboard coordinating Chef site agents and network tests](docs/images/brgrbyte-architecture.svg)
 
 The Order Window coordinates tests and stores reports. Chefs send test traffic directly to destinations; they can run in the provided Linux container or as a native Debian service.
 
@@ -57,7 +57,7 @@ In **Build & bite**, you are the customer: choose tools as patties, adjust each 
 - [Architecture](docs/ARCHITECTURE.md) · [API reference](docs/API.md) · [Roadmap](docs/ROADMAP.md)
 - [Testing guide](docs/TESTING_GUIDE.md) · [Contributing](CONTRIBUTING.md)
 
-brgrByte was previously named BrgrOps, Pathwise, and NetworkPath. Existing `NETWORKPATH_` environment variables, agent paths, container names, and database volume identifiers remain unchanged for compatibility.
+Existing installations can continue using their current configuration and database volume. New installations use brgrByte-prefixed settings and resource names; see [upgrade notes](docs/UPGRADING.md) before upgrading an existing deployment.
 
 ## License
 

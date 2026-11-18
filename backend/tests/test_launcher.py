@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 spec = importlib.util.spec_from_file_location(
-    "networkpath_start", Path(__file__).resolve().parents[2] / "start.py"
+    "brgrbyte_start", Path(__file__).resolve().parents[2] / "start.py"
 )
 launcher = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(launcher)
@@ -41,7 +41,7 @@ def test_dashboard_config_is_private_and_never_overwritten(tmp_path):
     ):
         launcher.setup_dashboard()
         config = (tmp_path / ".env").read_text()
-        assert "NETWORKPATH_ADMIN_PASSWORD=safe-password-123" in config
+        assert "BRGRBYTE_ADMIN_PASSWORD=safe-password-123" in config
         assert "replace-with" not in config
         if os.name != "nt":
             assert (tmp_path / ".env").stat().st_mode & 0o777 == 0o600
@@ -122,7 +122,7 @@ def test_registration_with_real_api(client, tmp_path):
         patch.object(launcher, "api_post", side_effect=api_post),
     ):
         launcher.setup_agent(True, ("admin", "test-password-long-enough"))
-    credential = (tmp_path / ".env").read_text().split("NETWORKPATH_AGENT_CREDENTIAL=")[1].strip()
+    credential = (tmp_path / ".env").read_text().split("BRGRBYTE_AGENT_CREDENTIAL=")[1].strip()
     result = client.post(
         "/api/v1/agent/poll",
         headers={"Authorization": f"Bearer {credential}"},

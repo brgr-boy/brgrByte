@@ -17,7 +17,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
-LOG = logging.getLogger("networkpath-agent")
+LOG = logging.getLogger("brgrbyte-agent")
 
 
 def valid_target(target: str) -> bool:
@@ -76,7 +76,15 @@ def run_mtr(job: dict) -> dict:
         ):
             raise ValueError("MTR output does not contain a hop list")
     except (ValueError, AttributeError) as exc:
-        return {"success": False, "error": f"Invalid MTR JSON output: {exc}"[:1000]}
+        stderr = completed.stderr.strip() or "<empty>"
+        stdout = completed.stdout[:300] or "<empty>"
+        return {
+            "success": False,
+            "error": (
+                f"Invalid MTR JSON output (exit code {completed.returncode}): {exc}; "
+                f"stderr: {stderr[:300]}; stdout: {stdout!r}"
+            )[:1000],
+        }
     return {"success": True, "report": report}
 
 
@@ -344,7 +352,7 @@ def run_sipp(job: dict) -> dict:
     ):
         return {"success": False, "error": "Invalid SIPp job"}
     endpoint = f"[{target}]:{port}" if ":" in target else f"{target}:{port}"
-    with tempfile.TemporaryDirectory(prefix="networkpath-sipp-") as directory:
+    with tempfile.TemporaryDirectory(prefix="brgrbyte-sipp-") as directory:
         stats = os.path.join(directory, "statistics.csv")
         try:
             completed = subprocess.run(
@@ -487,15 +495,26 @@ def post(base_url: str, credential: str, path: str, data: dict) -> dict:
         return json.loads(content) if content else {}
 
 
+def environment_setting(name: str, legacy_name: str) -> str:
+    value = os.environ.get(name)
+    if value is not None:
+        return value
+    try:
+        return os.environ[legacy_name]
+    except KeyError as exc:
+        raise RuntimeError(f"Missing required setting: {name}") from exc
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    base_url = os.environ["NETWORKPATH_URL"].rstrip("/")
-    credential = os.environ["NETWORKPATH_AGENT_CREDENTIAL"]
+    base_url = environment_setting("BRGRBYTE_URL", "NETWORKPATH_URL")
+    credential = environment_setting("BRGRBYTE_AGENT_CREDENTIAL", "NETWORKPATH_AGENT_CREDENTIAL")
+    base_url = base_url.rstrip("/")
     parsed = urlparse(base_url)
     if parsed.scheme != "https" and not (
         parsed.scheme == "http" and parsed.hostname in ("localhost", "127.0.0.1", "::1")
     ):
-        raise ValueError("NETWORKPATH_URL must use HTTPS except on localhost")
+        raise ValueError("BRGRBYTE_URL must use HTTPS except on localhost")
     pending = None
     last_connection_log = 0.0
     while True:

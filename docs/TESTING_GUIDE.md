@@ -11,7 +11,7 @@ ruff check app migrations tests ..\agent ..\start.py
 
 The API tests use an isolated SQLite database and exercise inventory, authorization, test orchestration, agent identity, revocation, and result persistence. Agent subprocess tests mock the tools; they do not prove live network measurements.
 
-To check the schema migration against PostgreSQL, provide a disposable PostgreSQL database through `NETWORKPATH_DATABASE_URL` and run `alembic upgrade head` from `backend`. The unit tests do not demonstrate connectivity to Raspberry Pi agents or validate network testing engines.
+To check the schema migration against PostgreSQL, provide a disposable PostgreSQL database through `BRGRBYTE_DATABASE_URL` and run `alembic upgrade head` from `backend`. The unit tests do not demonstrate connectivity to Raspberry Pi agents or validate network testing engines.
 
 ## Frontend
 

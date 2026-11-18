@@ -1,9 +1,9 @@
 import os
 
-os.environ["NETWORKPATH_DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
-os.environ["NETWORKPATH_JWT_SECRET_KEY"] = "test-only-signing-secret-key-at-least-32"
-os.environ["NETWORKPATH_ADMIN_USERNAME"] = "admin"
-os.environ["NETWORKPATH_ADMIN_PASSWORD"] = "test-password-long-enough"
+os.environ["BRGRBYTE_DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
+os.environ["BRGRBYTE_JWT_SECRET_KEY"] = "test-only-signing-secret-key-at-least-32"
+os.environ["BRGRBYTE_ADMIN_USERNAME"] = "admin"
+os.environ["BRGRBYTE_ADMIN_PASSWORD"] = "test-password-long-enough"
 
 import pytest
 from fastapi.testclient import TestClient

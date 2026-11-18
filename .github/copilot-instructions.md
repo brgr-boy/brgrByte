@@ -9,7 +9,7 @@ brgrByte's own code is GPL-2.0-only; it wraps independently licensed tools rathe
 - The burger theme is intentional: build a burger by selecting test tools as patties and their settings as toppings; combos are preset configurations. Queueing starts separate tests, and taking a bite means viewing their results, not starting another test.
 - Keep tool names, inputs, status, failure details, and reports clear alongside the themed language. Do not imply that a completed report proves the target is reachable.
 - A burger uses one source and destination, but each selected tool is queued and reported independently. Partial submission and uncertain network outcomes must be visible; avoid silently retrying and duplicating tests.
-- Preserve existing `NETWORKPATH_` environment variables, agent paths and service names, container identifiers, and database volume names for compatibility unless an explicit migration is requested.
+- Keep migration compatibility for prior brgrByte deployment identifiers; document breaking resource changes and preserve existing data during upgrades.
 
 ## Architecture
 

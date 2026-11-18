@@ -2,9 +2,12 @@ services:
   agent:
     build:
       context: .
-    image: networkpath-agent:local
+    image: brgrbyte-agent:local
     env_file:
       - .env
+    environment:
+      BRGRBYTE_URL: ${BRGRBYTE_URL:-${NETWORKPATH_URL:-}}
+      BRGRBYTE_AGENT_CREDENTIAL: ${BRGRBYTE_AGENT_CREDENTIAL:-${NETWORKPATH_AGENT_CREDENTIAL:-}}
     network_mode: host
     cap_drop:
       - ALL

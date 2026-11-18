@@ -54,9 +54,9 @@ Copy-Item .env.example .env
 cp .env.example .env
 ```
 
-Edit `.env` and set unique values for `POSTGRES_PASSWORD`, `NETWORKPATH_JWT_SECRET_KEY` (at least 32 characters), and `NETWORKPATH_ADMIN_PASSWORD` (at least 12 characters). The example values are placeholders. Keep `.env` private and never commit it. The database password should be URL-safe because it is embedded in the database connection URL.
+Edit `.env` and set unique values for `POSTGRES_PASSWORD`, `BRGRBYTE_JWT_SECRET_KEY` (at least 32 characters), and `BRGRBYTE_ADMIN_PASSWORD` (at least 12 characters). The example values are placeholders. Keep `.env` private and never commit it. The database password should be URL-safe because it is embedded in the database connection URL.
 
-For a browser accessing the dashboard from another machine, configure `VITE_API_BASE_URL` as the browser-reachable API URL and set `NETWORKPATH_CORS_ORIGINS` to the exact dashboard origin before building the frontend. The default API URL is `http://localhost:8000`, which points to the browser's own machine. Use HTTPS for non-local access; see [deployment](DEPLOYMENT.md).
+For a browser accessing the dashboard from another machine, configure `VITE_API_BASE_URL` as the browser-reachable API URL and set `BRGRBYTE_CORS_ORIGINS` to the exact dashboard origin before building the frontend. The default API URL is `http://localhost:8000`, which points to the browser's own machine. Use HTTPS for non-local access; see [deployment](DEPLOYMENT.md).
 
 Start the services from the repository root:
 
@@ -64,7 +64,7 @@ Start the services from the repository root:
 docker compose up -d --build
 ```
 
-Open [http://localhost:8080](http://localhost:8080) on the control-center host and sign in with `NETWORKPATH_ADMIN_USERNAME` and `NETWORKPATH_ADMIN_PASSWORD` from `.env`. The API's interactive documentation is at [http://localhost:8000/docs](http://localhost:8000/docs), and readiness is at [http://localhost:8000/health/ready](http://localhost:8000/health/ready).
+Open [http://localhost:8080](http://localhost:8080) on the control-center host and sign in with `BRGRBYTE_ADMIN_USERNAME` and `BRGRBYTE_ADMIN_PASSWORD` from `.env`. The API's interactive documentation is at [http://localhost:8000/docs](http://localhost:8000/docs), and readiness is at [http://localhost:8000/health/ready](http://localhost:8000/health/ready).
 
 If startup fails, inspect `docker compose logs api` and `docker compose logs db`. The administrator is created only when the configured username does not already exist; changing the bootstrap password does not reset an existing account.
 
@@ -90,8 +90,8 @@ chmod 600 .env
 Edit `agent/.env` with a text editor, replacing the example values with your API URL and the credential copied from the dashboard:
 
 ```text
-NETWORKPATH_URL=https://control-center.example
-NETWORKPATH_AGENT_CREDENTIAL=<one-time-agent-credential>
+BRGRBYTE_URL=https://control-center.example
+BRGRBYTE_AGENT_CREDENTIAL=<one-time-agent-credential>
 ```
 
 The URL must reach the API, not merely the frontend, and its certificate must be trusted by the agent container. For a control center and agent sharing the same native Linux host, `http://localhost:8000` can be used for local development. Do not put credentials in the repository or shell history.

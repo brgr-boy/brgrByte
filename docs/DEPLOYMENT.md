@@ -14,4 +14,4 @@ The frontend is published on port 8080 and the API on port 8000. PostgreSQL is o
 
 ## Production considerations
 
-Terminate TLS at a trusted reverse proxy, update `NETWORKPATH_CORS_ORIGINS` and `VITE_API_BASE_URL`, restrict exposed ports, store secrets in a managed secret store, and secure database backups. This phase is an initial deployment foundation, not a production-hardened identity or certificate-management solution.
+Terminate TLS at a trusted reverse proxy, update `BRGRBYTE_CORS_ORIGINS` and `VITE_API_BASE_URL`, restrict exposed ports, store secrets in a managed secret store, and secure database backups. This phase is an initial deployment foundation, not a production-hardened identity or certificate-management solution.

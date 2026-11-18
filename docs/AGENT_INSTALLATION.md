@@ -17,8 +17,8 @@ brgrByte wraps these separately licensed tools; it invokes them and collects the
    touch .env
    chmod 600 .env
    # Edit .env with a text editor, then add:
-   # NETWORKPATH_URL=https://control-center.example
-   # NETWORKPATH_AGENT_CREDENTIAL=<credential-from-dashboard>
+   # BRGRBYTE_URL=https://control-center.example
+   # BRGRBYTE_AGENT_CREDENTIAL=<credential-from-dashboard>
    ```
 
    Use a trusted HTTPS endpoint accessible from the agent host. HTTP is allowed only for localhost. To trust a private CA, build a custom image that installs its CA certificate; do not disable TLS verification.
@@ -47,28 +47,50 @@ The container uses Linux host networking, so probes originate in the host networ
 The agent is a Python standard-library process for Linux hosts. The example below targets Debian with systemd; the service account must be able to run the distribution's `mtr` and its `mtr-packet` helper with the permissions required for ICMP probes. No agent listener is required. A live Debian ARM64 deployment has not yet been validated.
 
 1. Deploy the Order Window behind a trusted HTTPS reverse proxy. Register a Chef on the **Chefs** page as an administrator and copy its one-time credential. Each site needs a distinct agent and credential.
-2. On the site host, install `python3`, `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, `traceroute`, and `dnsutils` using the system package manager. Copy this repository's `agent/networkpath_agent.py` and `agent/networkpath-agent.service` to the host. For example, from a checkout on the host:
+2. On the site host, install `python3`, `mtr-tiny`, `iperf3`, `sip-tester`, `nmap`, `iputils-ping`, `traceroute`, and `dnsutils` using the system package manager. Copy this repository's `agent/brgrbyte_agent.py` and `agent/brgrbyte-agent.service` to the host. For example, from a checkout on the host:
 
    ```sh
    sudo apt update
    sudo apt install python3 mtr-tiny iperf3 sip-tester nmap iputils-ping traceroute dnsutils
-   sudo useradd --system --no-create-home --shell /usr/sbin/nologin networkpath
-   sudo install -d -m 755 /opt/networkpath
-   sudo install -m 644 agent/networkpath_agent.py /opt/networkpath/networkpath_agent.py
-   sudo install -m 644 agent/networkpath-agent.service /etc/systemd/system/networkpath-agent.service
-   sudo install -d -m 700 /etc/networkpath
-   sudo install -m 600 /dev/null /etc/networkpath/agent.env
+   sudo useradd --system --no-create-home --shell /usr/sbin/nologin brgrbyte
+   sudo install -d -m 755 /opt/brgrbyte
+   sudo install -m 644 agent/brgrbyte_agent.py /opt/brgrbyte/brgrbyte_agent.py
+   sudo install -m 644 agent/brgrbyte-agent.service /etc/systemd/system/brgrbyte-agent.service
+   sudo install -d -m 700 /etc/brgrbyte
+   sudo install -m 600 /dev/null /etc/brgrbyte/agent.env
    ```
 
-3. Edit `/etc/networkpath/agent.env` as root, inserting the actual HTTPS URL and the one-time credential. Do not put credentials in the repository or shell history:
+3. Edit `/etc/brgrbyte/agent.env` as root, inserting the actual HTTPS URL and the one-time credential. Do not put credentials in the repository or shell history:
 
    ```text
-   NETWORKPATH_URL=https://control-center.example
-   NETWORKPATH_AGENT_CREDENTIAL=<credential-from-dashboard>
+   BRGRBYTE_URL=https://control-center.example
+   BRGRBYTE_AGENT_CREDENTIAL=<credential-from-dashboard>
    ```
 
    The URL must use HTTPS except for localhost, and the host must trust the reverse proxy's certificate. Protect the file and host: systemd service environment variables are not a dedicated secrets vault.
-4. Run `sudo systemctl daemon-reload`, then `sudo systemctl enable --now networkpath-agent`. Inspect `sudo systemctl status networkpath-agent` and `sudo journalctl -u networkpath-agent` for errors. Refresh **Chefs** in the Order Window to check connectivity and MTR availability.
+4. Run `sudo systemctl daemon-reload`, then `sudo systemctl enable --now brgrbyte-agent`. Inspect `sudo systemctl status brgrbyte-agent` and `sudo journalctl -u brgrbyte-agent` for errors. Refresh **Chefs** in the Order Window to check connectivity and MTR availability.
 5. In Build & bite, select the MTR patty and online agent, enter a hostname or IP address, and run the test. Choose Take a bite and refresh to see the saved report. The MTR package must support JSON output. If its helper cannot send probes, the test reports an error; consult the distribution's MTR permissions and firewall configuration rather than running the whole agent as root.
 
 The agent retries result delivery while running, but pending results are not durable across agent restarts. A lost or expired job becomes `TIMEOUT`; submit a new test. Revoke a compromised credential from the **Chefs** page in the Order Window, then create a new agent identity. Rotation in place is not implemented. Revocation cancels associated queued/running jobs but cannot interrupt an MTR process already running on the host.
+
+## Upgrade an existing deployment
+
+The new agent accepts both the current `BRGRBYTE_` environment variables and the previous `NETWORKPATH_` variables. Existing dashboard `.env` files also continue to work. Keep their PostgreSQL username, database name, password, and Docker volume unchanged; do not remove the volume during an upgrade.
+
+For an existing Docker deployment, stop and recreate services without removing volumes:
+
+```sh
+docker compose down
+```
+
+Keep the existing `.env`. Add `BRGRBYTE_POSTGRES_VOLUME` with the exact existing volume name if the old deployment used a custom Compose project name. You can identify the volume before stopping the stack with `docker volume ls`; the default project previously used `brgrbyte_networkpath-postgres`. Then update the checkout and run `docker compose up -d --build`. Do not run `docker compose down -v`.
+
+For an existing native Debian agent, install the new program and unit using the steps above. Copy the old `/etc/networkpath/agent.env` to `/etc/brgrbyte/agent.env` with mode `600`; the compatibility variables in that file remain accepted. Stop and disable the old service before starting the new one:
+
+```sh
+sudo systemctl disable --now networkpath-agent
+sudo systemctl daemon-reload
+sudo systemctl enable --now brgrbyte-agent
+```
+
+Verify the new service is connected before removing the old unit or files. The database contents and provisioned Chef credentials are not changed by this migration.

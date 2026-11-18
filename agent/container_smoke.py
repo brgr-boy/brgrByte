@@ -8,6 +8,14 @@ import time
 import networkpath_agent as agent
 
 assert os.geteuid() != 0
+for package in ("nmap", "nmap-common"):
+    version = subprocess.run(
+        ["dpkg-query", "-W", "-f=${Version}", package],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    assert version == "7.95+dfsg-3", (package, version)
 mtr = agent.run_mtr({"engine": "mtr", "target": "127.0.0.1", "cycles": 1})
 assert mtr["success"], mtr
 hops = mtr["report"]["report"]["hubs"]

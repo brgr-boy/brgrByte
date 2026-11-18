@@ -122,4 +122,7 @@ body{color:var(--text)}
 .burger-steps button:focus-visible,.bite-button:focus-visible{outline:2px solid #ffca76;outline-offset:2px}
 .site-form .bite-button{text-align:center;margin-top:0}
 .bite-button:hover,.burger-steps button:hover{border-color:#e4a253}
+.tool-attribution{font-size:11px;line-height:1.5;color:#d9c1a8;margin:0 0 16px}
+.tool-attribution a,.topping a{color:#ffd084;text-decoration:underline}
+.tool-attribution a:focus-visible,.topping a:focus-visible{outline:2px solid #ffca76;outline-offset:2px}
 @media(max-width:420px){.combo-grid,.tool-grid{grid-template-columns:1fr}}

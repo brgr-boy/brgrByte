@@ -22,4 +22,4 @@ npm test
 npm run build
 ```
 
-The production build includes TypeScript project checks. CI builds the agent image and runs loopback MTR, iPerf3, SIPp, Nmap, ping, and traceroute smoke tests as its non-root user with the documented capabilities. PostgreSQL concurrency and real network and ARM64 hardware integration require additional live environments.
+The production build includes TypeScript project checks. CI builds the agent image, checks the pinned Nmap package versions, and runs loopback MTR, iPerf3, SIPp, Nmap, ping, and traceroute smoke tests as its non-root user with the documented capabilities. PostgreSQL concurrency and real network and ARM64 hardware integration require additional live environments.

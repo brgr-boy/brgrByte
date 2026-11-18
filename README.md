@@ -1,6 +1,6 @@
 # BrgrByte
 
-BrgrByte is a self-hosted control center for running network tests from distributed sites and collecting their results in one place. It combines a web dashboard, a PostgreSQL-backed API, and site agents that package open-source testing tools.
+BrgrByte is a self-hosted wrapper and control center for running network tests from distributed sites and collecting their results in one place. It combines a web dashboard, a PostgreSQL-backed API, and site agents that invoke independently developed network-testing tools and collect their output. BrgrByte is not a replacement implementation of those tools.
 
 Use it to investigate a network path, measure throughput between locations, or generate SIP call load from a site without manually collecting output from each host.
 
@@ -18,6 +18,16 @@ Use it to investigate a network path, measure throughput between locations, or g
 | **Traceroute** | Examine the path to a host. | Numeric UDP traceroute, up to 30 hops; firewalls may filter probes or responses. |
 
 The dashboard also provides site and agent inventory, role-based access, agent credential provisioning and revocation, and saved test sessions. MTR or traceroute report collection does not guarantee that the destination responded; firewalls and ICMP rate limiting can affect measurements. SIPp does not measure RTP media quality. Only scan or probe systems you are authorized to test.
+
+## License and third-party tools
+
+BrgrByte's own code is licensed under the [GNU General Public License, version 2 only](LICENSE) (GPL-2.0-only). The separately developed tools and dependencies retain their own licenses; BrgrByte's license does not replace them. The agent image installs Debian packages during build rather than vendoring their source. Consult each installed package's `/usr/share/doc/<package>/copyright` and applicable license terms when distributing images or binaries.
+
+BrgrByte uses the [Nmap Security Scanner](https://nmap.org/) to perform TCP port scans. Its agent specifically executes Nmap and parses its output. Nmap's terms are not plain GPLv2: the [Debian trixie package license](https://sources.debian.org/src/nmap/7.95%2Bdfsg-3/debian/copyright/) describes additional conditions, including its interpretation of applications that execute Nmap and parse results, and states that its covered work cannot be combined with plain GPL software without the additional terms. The upstream [Nmap Public Source License](https://nmap.org/npsl/) likewise has additional terms and has not been through OSI certification. These texts are not interchangeable. The agent image pins `nmap` and `nmap-common` to Debian `7.95+dfsg-3`; native installations and modified images may use different versions.
+
+The [third-party notices](third-party-notices/README.md) include a copy of the Nmap 7.95 source package's license for reference. It is not a substitute for the notices applicable to the exact version in a distributed release.
+
+**Nmap redistribution is not yet cleared.** GPLv2 alone does not establish that distributing a BrgrByte image containing Nmap complies with Nmap's terms. Obtain written clarification or permission from the Nmap Project, or consult qualified counsel, before distributing such an image. Review source availability, attribution, and the other tools' and dependencies' licenses separately. This is not a legal opinion.
 
 ## How it works
 

@@ -2,6 +2,8 @@
 
 BrgrByte is a self-hosted, open-source network testing and reporting platform. A central dashboard coordinates distributed site agents that run open-source tools directly against authorized endpoints. One workstation may run both the dashboard and an agent; deployment should remain approachable on Windows and Linux.
 
+BrgrByte's own code is GPL-2.0-only; it wraps independently licensed tools rather than replacing them. Nmap's additional terms and image redistribution are not yet cleared; do not imply that plain GPLv2 resolves them. See the README's license section.
+
 ## Product and UX
 
 - The burger theme is intentional: build a burger by selecting test tools as patties and their settings as toppings; combos are preset configurations. Queueing starts separate tests, and taking a bite means viewing their results, not starting another test.

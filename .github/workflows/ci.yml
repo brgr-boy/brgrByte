@@ -1,4 +1,4 @@
-name: CI
+name: BrgrByte CI
 
 on:
   push:
@@ -60,10 +60,10 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: ./agent
-          tags: networkpath-agent:ci
+          tags: brgrbyte-agent:ci
           load: true
       - name: Smoke test packaged tools in non-root agent container
         run: |
           docker run --rm --cap-drop ALL --cap-add NET_RAW --read-only \
             --tmpfs /tmp:rw,noexec,nosuid,size=32m \
-            --entrypoint python networkpath-agent:ci /app/container_smoke.py
+            --entrypoint python brgrbyte-agent:ci /app/container_smoke.py
